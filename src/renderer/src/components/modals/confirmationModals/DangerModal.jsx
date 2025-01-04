@@ -1,8 +1,9 @@
 import React from 'react'
 
-const DeleteConfirmationModal = ({
+const DangerModal = ({
   isOpen,
   setIsOpen,
+  confirmButtonName,
   onClose = () => setIsOpen(false), // Default onClose to setIsOpen(false)
   onConfirm,
   title = 'Are you sure?',
@@ -25,13 +26,13 @@ const DeleteConfirmationModal = ({
           </div>
         </div>
         <h3 className="text-lg text-center font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-sm text-gray-500 mb-4">{message}</p>
+        <p className="text-sm text-gray-500 mb-4 text-center">{message}</p>
         <div className="flex justify-end gap-2">
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
+            className="px-4 py-2 font-medium tracking-wider bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
           >
-            Yes, Confirm
+            {confirmButtonName || 'Yes, Confirm'}
           </button>
           <button
             onClick={onClose} // Close modal when clicking Cancel
@@ -45,4 +46,4 @@ const DeleteConfirmationModal = ({
   )
 }
 
-export default DeleteConfirmationModal
+export default DangerModal

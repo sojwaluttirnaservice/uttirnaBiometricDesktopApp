@@ -11,6 +11,7 @@ import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
 import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
 
 import NoImageAvailabePlaceholderImage from '../../assets/static-images/no-image-placeholder.svg.png'
+import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 
 const CandidateAttendance = (props, inputRef) => {
   const candidateInfo = useSelector((state) => state.candidateInfo)
@@ -36,6 +37,7 @@ const CandidateAttendance = (props, inputRef) => {
       let batch = candidateInfo.sl_batch_no
       formData.set('batch', batch)
       formData.set('student_photo', candidatePhoto)
+      formData.set('labName', candidateInfo.lab_name)
 
       const { data: resData } = await axios.post(url, formData, {
         headers: {
@@ -46,7 +48,7 @@ const CandidateAttendance = (props, inputRef) => {
       const { success, data, message, error } = resData
 
       if (success) {
-        const { attendenceCount, batchCount } = data
+        const { attendenceCount, batchCount, labCount } = data
         showSuccessToast(message || 'Attendance marked successfully')
         dispatch(
           setWebcamImage({
@@ -57,6 +59,7 @@ const CandidateAttendance = (props, inputRef) => {
         )
         dispatch(setTotalAttendance(attendenceCount?.[0]))
         dispatch(setBatchAttendance(batchCount?.[0]))
+        dispatch(setLabAttendance(labCount?.[0]))
         dispatch(setCandidateAttendanceStatus(1))
         inputRef.current.focus()
       }
@@ -67,7 +70,7 @@ const CandidateAttendance = (props, inputRef) => {
   }
 
   useEffect(() => {
-    console.log(candidateInfo);
+    console.log(candidateInfo)
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
         handleMarkCandidateAttendance(e)

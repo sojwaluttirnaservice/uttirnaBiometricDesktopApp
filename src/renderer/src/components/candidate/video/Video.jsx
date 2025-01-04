@@ -36,7 +36,7 @@ const Video = () => {
           cropLiveVideo()
         })
       }
-      showSuccessToast('Camera is Accessible')
+      // showSuccessToast('Camera is Accessible')
       setCameraError('')
       setIsCameraModalOpen(false) // Hide modal on success
     } catch (err) {

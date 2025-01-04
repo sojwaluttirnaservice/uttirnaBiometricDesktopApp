@@ -1,12 +1,25 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { resetCandidateInfo } from '../../../redux/slices/candidateSlice'
+import { resetBatchAttendance } from '../../../redux/slices/batchAttendanceSlice'
+import { resetTotalAttendance } from '../../../redux/slices/totalAttendanceSlice'
 
 const CandidateInfo = () => {
   const candidateInfo = useSelector((state) => state.candidateInfo)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    // WHEN IT WILL UNMOUNT, RESET THE CANDIATE DETIALS ALONG WITH ALL OTEHR DETIALS
+    return () => {
+      dispatch(resetCandidateInfo())
+      dispatch(resetTotalAttendance())
+      dispatch(resetBatchAttendance())
+    }
+  }, [])
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="h-full  flex flex-col gap-4">
         <h3 className="text-center font-bold text-[#555]">Candidate Details</h3>
         <div className="candidate-info">
           <div className="grid grid-cols-3 col-span-3 gap-3 shadow-md p-6 rounded-[2rem]">

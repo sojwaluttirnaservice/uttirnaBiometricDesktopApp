@@ -8,10 +8,11 @@ import { setCandidateInfo, setWebcamImage } from '../../redux/slices/candidateSl
 import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
 import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
 
-import DeleteConfirmationModal from '../modals/confirmationModals/DeleteConfirmationModal'
+import DangerModal from '../modals/confirmationModals/DangerModal'
 
 import axios from 'axios'
 import { resetConnectionData } from '../../redux/slices/connectionDataSlice'
+import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 
 const Navbar = (props, inputRef) => {
   const connectionData = useSelector((state) => state.connectionData)
@@ -31,8 +32,9 @@ const Navbar = (props, inputRef) => {
 
   const [isSelectLabDisabled, setIsSelectLabDisabled] = useState(false)
 
-  // Modal state for DeleteConfirmationModal
+  // Modal state for DangerModal
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   const handleConfirmReset = () => {
     setLab('')
@@ -42,30 +44,27 @@ const Navbar = (props, inputRef) => {
 
   // Get the batch from local storage and set the value for select tag
 
-  //TODO: USE EFFECT FETCHES THE LABS AND BATCHES
+  //DONE: USE EFFECT FETCHES THE LABS AND BATCHES
   useEffect(() => {
-    // Fetch differenct batches and labs from the database
-
-    const handleFetchBatches = async () => {
-      try {
-        // TODO: Fetch batches and set them into below variable
-
-        const dummyBatches = [1, 2, 3, 4, 5]
-        setBatches(dummyBatches)
-      } catch (err) {
-        console.error(err)
-        showErrorToast(err.message || 'Failed to fetch batches')
-      }
-    }
-
-    handleFetchBatches()
+    // Fetch differenct labs and batches from the database
 
     const handleFetchLabs = async () => {
       try {
-        // TODO: Fetch batches and set them into below variable
+        // DONE: Fetch batches and set them into below variable
 
-        const dummyLabs = [1, 2, 3, 4, 5]
-        setLabs(dummyLabs)
+        let url = `${connectionData.backendUrl}/api/attendence/v1/lab-list`
+
+        const { data: resData } = await axios.get(url)
+
+        const { success, message, data } = resData
+
+        if (success) {
+          let { _labList } = data
+          setLabs(_labList)
+        } else {
+          showWarningToast(message || 'No lab data found')
+          return
+        }
       } catch (err) {
         console.error(err)
         showErrorToast(err.message || 'Failed to fetch labs')
@@ -75,6 +74,7 @@ const Navbar = (props, inputRef) => {
     handleFetchLabs()
   }, [])
 
+  // WHEN THE COMPONENT RELOADED, GET THE BATCH AND LAB FROM LOCAL STORAGE
   useEffect(() => {
     const storedBatch = localStorage.getItem('batch')
     if (storedBatch) {
@@ -85,11 +85,40 @@ const Navbar = (props, inputRef) => {
     if (storedLab) {
       setLab(storedLab)
     }
+
+    // Remove the batch and lab from local storage when the component unmounts
+    return () => {
+      localStorage.removeItem('batch')
+      localStorage.removeItem('lab')
+      setCandidateId(null)
+    }
   }, [])
 
   // Handles the change in the selected batch
 
   useEffect(() => {
+    // fetcht the batches corresponding the lab
+    const handleFetchBatches = async () => {
+      try {
+        // Fetching the candidate data
+        let url = `${connectionData.backendUrl}/api/attendence/v1/batch-list?labname=${lab}`
+        const { data: resData } = await axios.get(url)
+
+        const { success, message, data } = resData
+
+        if (success) {
+          let { _batchList } = data
+          setBatches(_batchList)
+        } else {
+          showErrorToast(message || 'Something went wrong')
+        }
+      } catch (err) {
+        console.log(err)
+        showErrorToast('Failed to fetch the batches')
+      }
+    }
+    if (lab) handleFetchBatches()
+
     const handleBatchChange = () => {
       if (lab == '') setBatch('')
       localStorage.setItem('batch', batch)
@@ -99,6 +128,7 @@ const Navbar = (props, inputRef) => {
 
   const handleLabChange = (e) => {
     let selectedLab = e.target.value
+    showSuccessToast(`Selected Lab : ${selectedLab}`)
     setLab(selectedLab)
     // also reset the batch too
     setBatch('')
@@ -112,6 +142,10 @@ const Navbar = (props, inputRef) => {
     e.preventDefault()
     e.stopPropagation()
     try {
+      if (!lab) {
+        showWarningToast('Please select a lab')
+        return
+      }
       if (!candidateId || isNaN(candidateId)) {
         showWarningToast('Please enter a valid candidate id')
         return
@@ -121,22 +155,30 @@ const Navbar = (props, inputRef) => {
         showWarningToast('Please select a batch')
         return
       }
-      // Fetching the studen data
+      // Fetching the candidate data
       let endpoint = `${connectionData.backendUrl}/api/attendence/v1/student-details`
       const { data: resData } = await axios.post(endpoint, {
         batch,
-        id: candidateId
+        id: candidateId,
+        labName: lab
       })
 
       let { success, data, message } = resData
 
       if (success) {
         showSuccessToast('Candidate data fetched.')
-        const { student, studentAttendenceCount, batchAttendanceCount, already_present } = data
+        const {
+          student,
+          studentAttendenceCount,
+          batchAttendanceCount,
+          labAttendanceCount,
+          already_present
+        } = data
 
         dispatch(setCandidateInfo(student))
         dispatch(setTotalAttendance(studentAttendenceCount?.[0]))
         dispatch(setBatchAttendance(batchAttendanceCount?.[0]))
+        dispatch(setLabAttendance(labAttendanceCount?.[0]))
         dispatch(
           setWebcamImage({
             snapshotCaptured: false,
@@ -163,14 +205,28 @@ const Navbar = (props, inputRef) => {
 
   return (
     <>
-      {/* DeleteConfirmationModal */}
-      <DeleteConfirmationModal
+      {/* Modal for the rest lab */}
+      <DangerModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
         onConfirm={handleConfirmReset}
         title="Are you sure you want to reset the lab?"
         message="This action will clear the selected lab and batch."
       />
+
+      {/* Modals for logout asking */}
+      <DangerModal
+        isOpen={isLogoutModalOpen}
+        setIsOpen={setIsLogoutModalOpen}
+        onConfirm={(e) => {
+          e.preventDefault()
+          dispatch(resetConnectionData())
+        }}
+        confirmButtonName={'Confirm Logout'}
+        title="Logout"
+        message="Are you sure you want to log out?"
+      />
+
       <div className="bg-white sticky top-0 border-b border-gray-400">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between font-semibold">
@@ -208,15 +264,15 @@ const Navbar = (props, inputRef) => {
                     >
                       --Select Lab--
                     </option>
-                    f
-                    {labs.map((labNumber) => {
+
+                    {labs.map((singleLabDetails, labEntryIndex) => {
                       return (
                         <option
-                          key={labNumber}
-                          value={labNumber}
+                          key={labEntryIndex}
+                          value={singleLabDetails.lab_name}
                           className="text-center py-2 font-semibold bg-transparent hover:bg-purple-100 hover:text-black focus:bg-purple-500 focus:text-white"
                         >
-                          LAB - {labNumber}
+                          {singleLabDetails.lab_name}
                         </option>
                       )
                     })}
@@ -240,14 +296,14 @@ const Navbar = (props, inputRef) => {
                     >
                       --Select Batch--
                     </option>
-                    {batches.map((batchNumber) => {
+                    {batches.map((singleBatch) => {
                       return (
                         <option
-                          key={batchNumber}
-                          value={batchNumber}
+                          key={singleBatch.sl_batch_no}
+                          value={singleBatch.sl_batch_no}
                           className="text-center py-2 font-semibold bg-transparent hover:bg-purple-100 hover:text-black focus:bg-purple-500 focus:text-white"
                         >
-                          Batch - {batchNumber}
+                          Batch - {singleBatch.sl_batch_no}
                         </option>
                       )
                     })}
@@ -263,14 +319,17 @@ const Navbar = (props, inputRef) => {
                       id="student-id"
                       placeholder="Search candidate..."
                       autoComplete="off"
-                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-12 text-md border border-gray-300 rounded-xl"
+                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48 pr-12 text-md border border-gray-300 rounded-xl"
                       value={candidateId}
                       onChange={(e) => setCandidateId(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleFetchCandidateData(e)
                         }
+
                       }}
+                      // in order to enable, select the both the options
+                      disabled={!lab || !batch}
                     />
                   </div>
                   <div className="button-holder">
@@ -311,11 +370,11 @@ const Navbar = (props, inputRef) => {
             {/* RIGHT */}
             <div>Connected To: {connectionData.backendUrl}</div>{' '}
             <button
-              className="w-6 h-6 ml-1 bg-rose-500 p-1 rounded-full"
+              className="size-7 text-sm ml-1 bg-rose-500 p-1 rounded-full"
               type="button"
               onClick={(e) => {
                 e.preventDefault()
-                dispatch(resetConnectionData())
+                setIsLogoutModalOpen(true)
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -328,7 +387,7 @@ const Navbar = (props, inputRef) => {
             </button>
           </div>
         </div>
-      </div>{' '}
+      </div>
     </>
   )
 }

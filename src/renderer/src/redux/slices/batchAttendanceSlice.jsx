@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialBatchAttendanceState = {
-  batch_total_students: '',
-  batch_present_count: '',
-  batch_attendance_not_marked: ''
+  batch_total_students: 0,
+  batch_present_count: 0,
+  batch_attendance_not_marked: 0
 }
 
 const batchAttendanceSlice = createSlice({
@@ -12,10 +12,14 @@ const batchAttendanceSlice = createSlice({
   reducers: {
     setBatchAttendance: (state, action) => {
       return { ...state, ...action.payload }
+    },
+    
+    resetBatchAttendance: (state, action) => {
+      return { ...initialBatchAttendanceState }
     }
   }
 })
 
-export const { setBatchAttendance } = batchAttendanceSlice.actions
+export const { setBatchAttendance, resetBatchAttendance } = batchAttendanceSlice.actions
 
 export default batchAttendanceSlice.reducer

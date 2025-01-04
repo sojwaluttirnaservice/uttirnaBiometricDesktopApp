@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-let candidateInitialState = {
+let initialCandidateInfo = {
   // Basic Identification
   id: '', // Candidate's unique identifier
   full_name: '', // Candidate's full name
@@ -22,7 +22,11 @@ let candidateInitialState = {
   sl_image: '', // Path to the candidate's saved image
   sl_sign: '', // Path to the candidate's saved signature
   sl_cam_image: '', // Path to the candidate's image captured on camera
-
+  lab_name: '',
+  lab_no: '',
+  department: '',
+  floor: '',
+  center_id: '',
   capturedWebcamImagePath: '',
   snapshotCaptured: false,
   justMarkedPresent: false,
@@ -35,10 +39,11 @@ let candidateInitialState = {
 
 const candidateInfoSlice = createSlice({
   name: 'candidateInfo',
-  initialState: candidateInitialState,
+  initialState: initialCandidateInfo,
 
   reducers: {
     setCandidateInfo: (state, action) => {
+      console.log(action.payload)
       let newInfo = { ...state, ...action.payload }
       return newInfo
     },
@@ -59,11 +64,19 @@ const candidateInfoSlice = createSlice({
     setCandidateAttendanceStatus: (state, action) => {
       let newAttendanceStatus = action.payload
       state.sl_present_status = newAttendanceStatus
+    },
+
+    resetCandidateInfo: (state, action) => {
+      return { ...initialCandidateInfo }
     }
   }
 })
 
-export const { setCandidateInfo, setWebcamImage, setCandidateAttendanceStatus } =
-  candidateInfoSlice.actions
+export const {
+  setCandidateInfo,
+  setWebcamImage,
+  setCandidateAttendanceStatus,
+  resetCandidateInfo
+} = candidateInfoSlice.actions
 
 export default candidateInfoSlice.reducer
