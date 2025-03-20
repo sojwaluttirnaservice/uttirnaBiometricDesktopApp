@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom'
 
 import CandidateAttendance from './pages/candidate/CandidateAttendance'
@@ -6,6 +6,8 @@ import Navbar from './components/navbar/Navbar'
 import './index.css'
 import CheckConnectionModal from './components/modals/CheckConnectionModal'
 import { useSelector } from 'react-redux'
+import ActionConfirmationModal from './components/modals/confirmationModals/ActionConfirmationModal'
+import LoginModal from './components/modals/confirmationModals/LoginModal'
 
 const Layout = () => {
   return (
@@ -18,6 +20,8 @@ const Layout = () => {
 const App = () => {
   let inputRef = useRef(null)
   const connectionData = useSelector((state) => state.connectionData)
+
+  const userSlice = useSelector((state) => state.userSlice)
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -50,13 +54,24 @@ const App = () => {
         </>
       ) : (
         <>
-          <Navbar ref={inputRef} /> {/* Navbar is now part of the Router */}
-          {<CandidateAttendance ref={inputRef} />}
-          {/* <Routes>
+          <LoginModal
+            hideCloseButton={true}
+            width={'w-[400px]'}
+            title="Login"
+            isOpen={!userSlice.isLoggedIn}
+          />
+
+          {userSlice.isLoggedIn && (
+            <>
+              <Navbar ref={inputRef} /> {/* Navbar is now part of the Router */}
+              {<CandidateAttendance ref={inputRef} />}
+              {/* <Routes>
             <Route path="/" element={<Layout />}>
               <Route path='' element={<CandidateAttendance ref={inputRef} />} />
             </Route>
           </Routes> */}
+            </>
+          )}
         </>
       )}
     </Router>

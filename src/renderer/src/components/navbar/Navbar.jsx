@@ -13,9 +13,11 @@ import DangerModal from '../modals/confirmationModals/DangerModal'
 import axios from 'axios'
 import { resetConnectionData } from '../../redux/slices/connectionDataSlice'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
+import { logoutUser } from '../../redux/slices/userSlice'
 
 const Navbar = (props, inputRef) => {
   const connectionData = useSelector((state) => state.connectionData)
+  const userSlice = useSelector((state) => state.userSlice)
 
   const dispatch = useDispatch()
 
@@ -72,7 +74,7 @@ const Navbar = (props, inputRef) => {
     }
 
     handleFetchLabs()
-  }, [])
+  }, [userSlice])
 
   // WHEN THE COMPONENT RELOADED, GET THE BATCH AND LAB FROM LOCAL STORAGE
   useEffect(() => {
@@ -220,7 +222,7 @@ const Navbar = (props, inputRef) => {
         setIsOpen={setIsLogoutModalOpen}
         onConfirm={(e) => {
           e.preventDefault()
-          dispatch(resetConnectionData())
+          dispatch(logoutUser())
         }}
         confirmButtonName={'Confirm Logout'}
         title="Logout"
@@ -326,7 +328,6 @@ const Navbar = (props, inputRef) => {
                         if (e.key === 'Enter') {
                           handleFetchCandidateData(e)
                         }
-
                       }}
                       // in order to enable, select the both the options
                       disabled={!lab || !batch}

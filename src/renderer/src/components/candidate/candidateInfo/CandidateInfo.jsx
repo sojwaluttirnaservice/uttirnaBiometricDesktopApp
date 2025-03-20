@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { resetCandidateInfo } from '../../../redux/slices/candidateSlice'
 import { resetBatchAttendance } from '../../../redux/slices/batchAttendanceSlice'
 import { resetTotalAttendance } from '../../../redux/slices/totalAttendanceSlice'
+import { logoutUser } from '../../../redux/slices/userSlice'
 
 const CandidateInfo = () => {
   const candidateInfo = useSelector((state) => state.candidateInfo)
@@ -10,10 +11,12 @@ const CandidateInfo = () => {
 
   useEffect(() => {
     // WHEN IT WILL UNMOUNT, RESET THE CANDIATE DETIALS ALONG WITH ALL OTEHR DETIALS
+    // TODO: UNCOMMENT BELOW LATER
     return () => {
       dispatch(resetCandidateInfo())
       dispatch(resetTotalAttendance())
       dispatch(resetBatchAttendance())
+      dispatch(logoutUser())
     }
   }, [])
 

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -33,6 +33,30 @@ function createWindow() {
     mainWindow.show()
   })
 
+
+ 
+   
+  mainWindow.on('close', (e) => {
+    e.preventDefault() // Prevent window from closing immediately
+
+    // Show a confirmation dialog before quitting
+    const response = dialog.showMessageBoxSync(mainWindow, {
+      type: 'warning',
+      buttons: ['Cancel', 'Quit'],
+      defaultId: 1, // Quit is the default option
+      title: 'Confirm Quit',
+      message: 'Are you sure you want to quit the app?'
+    })
+
+    if (response === 0) {
+      console.log('Quit canceled')
+    } else {
+      // If user clicks "Quit", then proceed with quitting
+      mainWindow.destroy() // Close the window
+      app.quit()
+    }
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -54,13 +78,13 @@ function createWindow() {
 app.whenReady().then(() => {
   // This below setting is for camera
   // const ses = session.fromPartition('persist:name')
-  const ses = session.defaultSession; // Using default session
+  const ses = session.defaultSession // Using default session
   ses.setPermissionRequestHandler((webContents, permission, callback) => {
     if (permission === 'media') {
       callback(true) // Allow media permissions (camera)
     } else {
       callback(false) // Deny other permissions
-   }
+    }
   })
 
   // Camera settign end
@@ -105,3 +129,29 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+//  ======= DO SOME ACTION BEFORE CLOSING THE APP =======
+
+// app.on('before-quit', (e) => {
+//   e.preventDefault();
+
+//   // SHOW POPUP BEFORE THE CLOSING
+
+//   // alert("Are you sure you want to quit the app")
+//   // Show a confirmation dialog before quitting
+//   const response = dialog.showMessageBoxSync({
+//     type: 'warning',
+//     buttons: ['Cancel', 'Quit'],
+//     defaultId: 1, // Quit is the default option
+//     title: 'Confirm Quit',
+//     message: 'Are you sure you want to quit the app?'
+//   });
+
+//   // If the user clicked "Cancel" (button 0), prevent quitting
+//   if (response === 0) {
+//     console.log('Quit canceled');
+//   } else {
+//     // If the user clicked "Quit" (button 1), proceed with quitting
+//     app.quit();
+//   }
+// })

@@ -39,6 +39,7 @@ const ShowFullDayAttendanceModal = ({
 
       if (success) {
         let { _labWiseCount } = data
+        // TODO: UNDO THIS LATER
         setLabwiseAttendanceCount(_labWiseCount)
       } else {
         setLabwiseAttendanceCount([])
@@ -97,15 +98,16 @@ const ShowFullDayAttendanceModal = ({
                           <th className="w-[16%] px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                             Shift
                           </th>
+                          <th className="w-[17.5%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
+                            Total Alloted
+                          </th>
                           <th className="w-[16%] px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
                             Present
                           </th>
                           <th className="w-[16%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
                             Absent
                           </th>
-                          <th className="w-[17.5%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
-                            Total
-                          </th>
+                          
                         </tr>
                       </thead>
                     </table>
@@ -113,29 +115,6 @@ const ShowFullDayAttendanceModal = ({
                 </div>
                 <ModalBody isScrollable={isScrollable}>
                   <div className="relative overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    {/* <div style={{ position:"absolute"}} className="sticky top-0">
-                      <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50 sticky top-0 z-10">
-                          <tr className="divide-x divide-gray-200 font-extrabold tracking-wider">
-                            <th className="w-[20%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                              Lab Details
-                            </th>
-                            <th className="w-[20%] px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
-                              Shift
-                            </th>
-                            <th className="w-[20%] px-4 py-3.5 text-left text-sm font-semibold text-gray-900">
-                              Present
-                            </th>
-                            <th className="w-[20%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
-                              Absent
-                            </th>
-                            <th className="w-[20%] py-3.5 pl-4 pr-4 text-left text-sm font-semibold text-gray-900 sm:pr-6">
-                              Total
-                            </th>
-                          </tr>
-                        </thead>
-                      </table>
-                    </div> */}
                     <div className="grow">
                       <table className="relative  min-w-full divide-y divide-gray-300">
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -147,14 +126,14 @@ const ShowFullDayAttendanceModal = ({
                               <td className="w-[20%] whitespace-nowrap p-4 text-sm text-gray-500">
                                 {sinlgeLab.shift || '-'}
                               </td>
+                              <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
+                                {sinlgeLab.lab_total_students}
+                              </td>
                               <td className="w-[20%] whitespace-nowrap p-4 text-sm text-gray-500">
                                 {sinlgeLab.lab_present_count}
                               </td>
                               <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
                                 {sinlgeLab.lab_attendance_not_marked}
-                              </td>
-                              <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-gray-500 sm:pr-6">
-                                {sinlgeLab.lab_total_students}
                               </td>
                             </tr>
                           ))}
@@ -168,6 +147,12 @@ const ShowFullDayAttendanceModal = ({
                             All Labs
                           </td>
                           <td className="w-[20%] whitespace-nowrap p-4 text-sm text-gray-500"></td>
+                          <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-sky-500 font-bold sm:pr-6">
+                            {labwiseAttendanceCount.reduce(
+                              (acc, curr) => acc + curr.lab_total_students,
+                              0
+                            )}
+                          </td>
                           <td className="w-[20%] whitespace-nowrap p-4 text-sm text-emerald-500 font-bold">
                             {labwiseAttendanceCount.reduce(
                               (acc, curr) => acc + curr.lab_present_count,
@@ -177,12 +162,6 @@ const ShowFullDayAttendanceModal = ({
                           <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-rose-500 font-bold sm:pr-6">
                             {labwiseAttendanceCount.reduce(
                               (acc, curr) => acc + curr.lab_attendance_not_marked,
-                              0
-                            )}
-                          </td>
-                          <td className="w-[20%] whitespace-nowrap py-4 pl-4 pr-4 text-sm text-sky-500 font-bold sm:pr-6">
-                            {labwiseAttendanceCount.reduce(
-                              (acc, curr) => acc + curr.lab_total_students,
                               0
                             )}
                           </td>

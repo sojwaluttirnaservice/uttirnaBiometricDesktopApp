@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Quit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      margin: 0;
+    }
+    .modal {
+      background-color: #333;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      width: 300px;
+    }
+    h2 {
+      margin: 0 0 20px;
+      font-size: 18px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .cancel {
+      background-color: #dc3545;
+    }
+    .cancel:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <h2>Are you sure you want to quit the app?</h2>
+    <div class="buttons">
+      <button class="cancel" id="cancelBtn">Cancel</button>
+      <button id="quitBtn">Quit</button>
+    </div>
+  </div>
+
+  <script>
+    // Button listeners to send responses to the main process via IPC
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      window.require('electron').ipcRenderer.send('quit-dialog-response', 'cancel');
+    });
+    document.getElementById('quitBtn').addEventListener('click', () => {
+      window.require('electron').ipcRenderer.send('quit-dialog-response', 'quit');
+    });
+  </script>
+</body>
+</html>

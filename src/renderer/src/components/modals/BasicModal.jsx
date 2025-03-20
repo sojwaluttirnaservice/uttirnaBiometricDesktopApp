@@ -2,6 +2,14 @@ import React from 'react'
 
 // ModalDialog - The container for the modal content
 
+export const BasicModal = ({ children }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
+      {children}
+    </div>
+  )
+}
+
 export const ModalDialog = ({ children, width = 'w-50', height = 'min-vh-100' }) => {
   return (
     <div
@@ -32,23 +40,32 @@ export const ModalHeader = ({ title, onClose }) => {
 
 // ModalBody - The body section with scrollable content
 export const ModalBody = ({ children, isScrollable }) => {
-  return (
-    <div className={`mt-4 grow ${isScrollable ? 'overflow-y-auto' : ''}`}>{children}</div>
-  )
+  return <div className={`mt-4 grow ${isScrollable ? 'overflow-y-auto' : ''}`}>{children}</div>
 }
 
 // ModalFooter - The footer with action buttons
-export const ModalFooter = ({ children, onClose }) => {
+export const ModalFooter = ({ children, onClose, setIsOpen, hideCloseButton }) => {
+  const handleClose = (e) => {
+    e.preventDefault()
+    if (onClose) {
+      onClose() // If onClose is provided, call it
+    } else {
+      setIsOpen(false) // If onClose is not provided, close modal via setIsOpen
+    }
+  }
   return (
     <div className="mt-auto">
       <div className="border-t pt-2 flex justify-end gap-2 mt-4">
         {children}
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none"
-        >
-          Cancel
-        </button>
+
+        {!hideCloseButton && (
+          <button
+            onClick={handleClose}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   )
@@ -61,21 +78,27 @@ const Modal = ({
   setIsOpen,
   title = 'Modal Title',
   onConfirm = () => {},
-  onClose = () => setIsOpen(false),
+  onClose,
+  hideCloseButton = false,
   isScrollable = false
 }) => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
+    <BasicModal>
       <ModalDialog>
         <ModalHeader title={title} onClose={onClose} />
         <ModalBody isScrollable={isScrollable}>
           <p className="text-sm text-gray-500">{children}</p>
         </ModalBody>
-        <ModalFooter onConfirm={onConfirm} onClose={onClose} />
+        <ModalFooter
+          setIsOpen={setIsOpen}
+          onConfirm={onConfirm}
+          hideCloseButton={hideCloseButton}
+          onClose={onClose}
+        />
       </ModalDialog>
-    </div>
+    </BasicModal>
   )
 }
 
