@@ -85,6 +85,19 @@ const CandidateAttendance = (props, inputRef) => {
     }
   }, [candidateInfo.snapshotCaptured])
 
+  function replaceColonsToUnderscore(item) {
+    /**
+     * eg. item = APMC ATPADI/users/APMC ATPADI_sign_600067_2025-02-17 21:58:31.jpeg
+     * */
+    if (!item) return false
+    return item.split('/').pop().replaceAll(':', '_')
+  }
+
+  function getImage(img) {
+    if (!img) return null
+    return `${connectionData.backendUrl}/${candidateInfo.candidateImageRelativePath}/${replaceColonsToUnderscore(img)}`
+  }
+
   return (
     <>
       {!candidateInfo.id ? (
@@ -121,7 +134,7 @@ const CandidateAttendance = (props, inputRef) => {
                   <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
                     <img
                       id="student-image"
-                      src={`${connectionData.backendUrl}/${candidateInfo.candidateImageRelativePath}/${candidateInfo.sl_image?.split('/')[1]}`}
+                      src={getImage(candidateInfo?.sl_image)}
                       onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
                       className="w-full h-full"
                     />
@@ -130,7 +143,7 @@ const CandidateAttendance = (props, inputRef) => {
                   <div className="sign-holder w-[17rem] h-[6rem] border rounded-xl overflow-hidden">
                     <img
                       id="student-sign"
-                      src={`${connectionData.backendUrl}/${candidateInfo.candidateSignRelativePath}/${candidateInfo.sl_sign?.split('/')[1]}`}
+                      src={getImage(candidateInfo?.sl_sign)}
                       onError={(e) => {
                         e.target.src = NoImageAvailabePlaceholderImage
                       }}
@@ -177,6 +190,19 @@ const CandidateAttendance = (props, inputRef) => {
                   >
                     Reset Page
                   </button>
+                </div>
+              </div>
+            )}
+
+            {candidateInfo.sl_present_status == 1 && (
+              <div className="status-buttons ">
+                <div className="w-full flex justify-center gap-6 mt-6">
+                  <div
+                    className="inline-flex items-center animate-pulse px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    onClick={handleMarkCandidateAttendance}
+                  >
+                    This candidate already marked present
+                  </div>
                 </div>
               </div>
             )}

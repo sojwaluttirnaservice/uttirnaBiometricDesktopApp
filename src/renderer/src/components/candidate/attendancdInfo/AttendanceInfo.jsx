@@ -7,7 +7,7 @@ import { ModalBody, ModalDialog, ModalFooter, ModalHeader } from '../../modals/B
 // Component for individual attendance card
 export const AttendanceCard = ({ title, value, icon, color }) => {
   return (
-    <div className="bg-[#fff] shadow-md p-3 rounded-[2rem] flex flex-col justify-center">
+    <div className="bg-[#fff] shadow-md p-3 rounded-lg flex flex-col justify-center hover:bg-gray-100 cursor-">
       <div className="flex items-end justify-center gap-2">
         <p className={`value text-4xl ${color}`}>{value}</p>
         <i className={`fa-solid ${icon} mb-1 ${color}`} />
@@ -145,7 +145,7 @@ const ShowFullDayAttendanceModal = ({
                                 {sinlgeLab.lab_name}
                               </td>
                               <td className="w-[20%] whitespace-nowrap p-4 text-sm text-gray-500">
-                                {sinlgeLab.shift || '-'}
+                                Shift - {sinlgeLab.sl_batch_no || '-'}
                               </td>
                               <td className="w-[20%] whitespace-nowrap p-4 text-sm text-gray-500">
                                 {sinlgeLab.lab_present_count}
@@ -271,7 +271,7 @@ const AttendanceInfo = () => {
           Attendance Details
           <span className="inline-block ms-auto">
             <button
-              className="px-4 py-1 border border-emerald-600 rounded text-emerald-600"
+              className="px-4 py-1 border border-emerald-600 rounded-lg text-emerald-600"
               type="button"
               onClick={(e) => setIsShowFullDayAttendanceModalOpen(true)}
             >
@@ -314,7 +314,8 @@ const AttendanceInfo = () => {
 
             {/* Lower box for batch attendance */}
             <div id="batchwise-count">
-              <div className="flex items-center justify-between gap-2">
+              {/* <div className="flex items-center justify-between gap-2"> */}
+              <div className="grid grid-cols-3 gap-3 text-center">
                 <AttendanceCard
                   title="Total Alloted"
                   value={batchAttendance.batch_total_students}
@@ -337,13 +338,14 @@ const AttendanceInfo = () => {
             </div>
 
             {/* Lab Information */}
-            <div className="value text-center font-semibold text-lg text-[#43A7FF]">
+            <div className="value text-center font-semibold text-lg text-[#43A7FF] hidden">
               LAB - <span className="text-[#F77935]">{candidateInfo.lab_name}</span>
             </div>
 
             {/* Lower box for lab attendance */}
-            <div id="labwise-count">
-              <div className="flex items-center justify-between gap-2">
+            <div id="labwise-count" className="hidden">
+              {/* <div className="flex items-center justify-between gap-2"> */}
+              <div className="grid grid-cols-3 gap-3 text-center">
                 <AttendanceCard
                   title="Total Alloted"
                   value={labAttendance.lab_total_students}

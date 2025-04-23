@@ -101,7 +101,7 @@ const Navbar = (props, inputRef) => {
     const handleFetchBatches = async () => {
       try {
         // Fetching the candidate data
-        let url = `${connectionData.backendUrl}/api/attendence/v1/batch-list?labname=${lab}`
+        let url = `${connectionData.backendUrl}/api/attendence/v1/batch-list`
         const { data: resData } = await axios.get(url)
 
         const { success, message, data } = resData
@@ -117,35 +117,21 @@ const Navbar = (props, inputRef) => {
         showErrorToast('Failed to fetch the batches')
       }
     }
-    if (lab) handleFetchBatches()
+     
 
     const handleBatchChange = () => {
       if (lab == '') setBatch('')
       localStorage.setItem('batch', batch)
+      handleFetchBatches()
     }
     handleBatchChange()
-  }, [batch, lab])
-
-  const handleLabChange = (e) => {
-    let selectedLab = e.target.value
-    showSuccessToast(`Selected Lab : ${selectedLab}`)
-    setLab(selectedLab)
-    // also reset the batch too
-    setBatch('')
-
-    if (selectedLab) setIsSelectLabDisabled(true)
-    localStorage.setItem('lab', selectedLab)
-  }
+  }, [])
 
   // Fetches teh data from remote server
   const handleFetchCandidateData = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     try {
-      if (!lab) {
-        showWarningToast('Please select a lab')
-        return
-      }
       if (!candidateId || isNaN(candidateId)) {
         showWarningToast('Please enter a valid candidate id')
         return
@@ -164,6 +150,7 @@ const Navbar = (props, inputRef) => {
       })
 
       let { success, data, message } = resData
+      console.log(data, '==data==')
 
       if (success) {
         showSuccessToast('Candidate data fetched.')
@@ -248,36 +235,6 @@ const Navbar = (props, inputRef) => {
             {/* MIDDLE */}
             <div>
               <div className="flex items-center gap-4">
-                {/* Select lab option */}
-                <div>
-                  <select
-                    className="px-4 py-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block text-md border border-gray-300 rounded-xl"
-                    name="lab_no"
-                    id="lab-no"
-                    onChange={handleLabChange}
-                    value={lab}
-                    disabled={isSelectLabDisabled}
-                  >
-                    <option
-                      value=""
-                      className="text-center py-2 font-semibold bg-transparent hover:bg-purple-100 hover:text-black focus:bg-purple-500 focus:text-white"
-                    >
-                      --Select Lab--
-                    </option>
-
-                    {labs.map((singleLabDetails, labEntryIndex) => {
-                      return (
-                        <option
-                          key={labEntryIndex}
-                          value={singleLabDetails.lab_name}
-                          className="text-center py-2 font-semibold bg-transparent hover:bg-purple-100 hover:text-black focus:bg-purple-500 focus:text-white"
-                        >
-                          {singleLabDetails.lab_name}
-                        </option>
-                      )
-                    })}
-                  </select>
-                </div>
 
                 {/* Select batch options */}
                 <div>
@@ -287,8 +244,6 @@ const Navbar = (props, inputRef) => {
                     id="batch-id"
                     onChange={(e) => setBatch(e.target.value)}
                     value={batch}
-                    // Select atlease one lab for enalbling this
-                    disabled={!lab ? true : false}
                   >
                     <option
                       value=""
@@ -314,22 +269,21 @@ const Navbar = (props, inputRef) => {
                   <div className="input-holder">
                     <input
                       ref={inputRef}
-                      type="text"
+                      type="number"
                       name="search"
                       id="student-id"
                       placeholder="Search candidate..."
                       autoComplete="off"
-                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48 pr-12 text-md border border-gray-300 rounded-xl"
+                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48  text-md border border-gray-300 rounded-xl"
                       value={candidateId}
                       onChange={(e) => setCandidateId(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleFetchCandidateData(e)
                         }
-
                       }}
                       // in order to enable, select the both the options
-                      disabled={!lab || !batch}
+                      // disabled={!batch}
                     />
                   </div>
                   <div className="button-holder">
@@ -348,7 +302,7 @@ const Navbar = (props, inputRef) => {
                     </button>
                   </div>
 
-                  <div className="reset-lab-holder">
+                  {/* <div className="reset-lab-holder">
                     <button
                       type="button"
                       id="reset-lab-btn"
@@ -363,7 +317,7 @@ const Navbar = (props, inputRef) => {
                         </div>
                       </div>
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
