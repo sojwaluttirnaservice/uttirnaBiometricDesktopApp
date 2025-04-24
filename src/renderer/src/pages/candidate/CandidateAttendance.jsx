@@ -23,7 +23,7 @@ const CandidateAttendance = (props, inputRef) => {
     e?.preventDefault?.()
 
     if (!candidateInfo.id || !candidateInfo.snapshotCaptured) {
-      showErrorToast(`Please Capture a Photo ${candidateInfo.snapshotCaptured}`)
+      showErrorToast(`Please Capture a Photo.`)
       return
     }
 

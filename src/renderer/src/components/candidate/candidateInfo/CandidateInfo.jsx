@@ -56,7 +56,7 @@ const CandidateInfo = () => {
               <div>
                 <div className="label font-semibold text-[#555] text-md">Exam Time</div>
                 <div className="value font-semibold text-lg text-[#43A7FF]" id="exam-date">
-                  -
+                  {candidateInfo.exam_time}
                 </div>
               </div>
             </div>
