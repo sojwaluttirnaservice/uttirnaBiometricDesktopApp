@@ -1,4 +1,5 @@
 import React from 'react'
+import { FaXmark } from 'react-icons/fa6'
 
 // ModalDialog - The container for the modal content
 
@@ -18,14 +19,9 @@ export const ModalHeader = ({ title, onClose }) => {
   return (
     <div className="flex justify-between items-center border-b pb-4">
       <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
-      {/* <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-6 h-6">
-          <path
-            fill="currentColor"
-            d="M328.1 184.1L327.3 183.3 183.3 327.3 184.1 328.1l144-144 144 144 0.8-0.8-0.8-0.8zM0 256a256 256 0 1 1 512 0 256 256 0 1 1-512 0z"
-          />
-        </svg>
-      </button> */}
+      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <FaXmark />
+      </button>
     </div>
   )
 }
@@ -59,8 +55,9 @@ const Modal = ({
   setIsOpen,
   title = 'Modal Title',
   onConfirm = () => {},
-  onClose = () => setIsOpen(false),
-  isScrollable = false
+  onClose,
+  isScrollable = false,
+  className = ''
 }) => {
   if (!isOpen) return null
 

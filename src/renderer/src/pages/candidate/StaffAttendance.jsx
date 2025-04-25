@@ -12,6 +12,7 @@ import { MdOutlineMailOutline } from 'react-icons/md'
 import { PiOfficeChair } from 'react-icons/pi'
 import { RiContactsLine } from 'react-icons/ri'
 import { HiDesktopComputer } from 'react-icons/hi'
+import StaffAttendanceModal from './StaffAttendanceModal'
 
 const StaffAttendance = () => {
   const staffFormDataRef = useRef(null)
@@ -19,6 +20,7 @@ const StaffAttendance = () => {
   const connectionData = useSelector((state) => state.connectionData)
 
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false)
+  const [isShowattendanceModal, setIsShowattendanceModal] = useState(false)
   const [labsList, setLabsList] = useState([])
   const [staffList, setStaffList] = useState([])
 
@@ -40,7 +42,6 @@ const StaffAttendance = () => {
     try {
       const url = `${connectionData.backendUrl}/api/staff/v1/list`
       const { data: resData } = await axios.get(url)
-      console.log(resData)
       setStaffList(resData?.data || [])
     } catch (err) {
       console.error(`Error while getting staff list: ${err}`)
@@ -133,7 +134,7 @@ const StaffAttendance = () => {
             className="bg-white p-8 rounded-2xl space-y-6 w-full"
           >
             <div>
-              <label className="block text-gray-600 mb-1" for="name">
+              <label className="block text-gray-600 mb-1" htmlFor="name">
                 Name
               </label>
               <input
@@ -145,7 +146,7 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" for="mobile">
+              <label className="block text-gray-600 mb-1" htmlFor="mobile">
                 Mobile
               </label>
               <input
@@ -157,7 +158,7 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" for="alloted-lab">
+              <label className="block text-gray-600 mb-1" htmlFor="alloted-lab">
                 Lab
               </label>
               <select
@@ -178,7 +179,7 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" for="email">
+              <label className="block text-gray-600 mb-1" htmlFor="email">
                 Email
               </label>
               <input
@@ -190,7 +191,7 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" for="aadhaar-number">
+              <label className="block text-gray-600 mb-1" htmlFor="aadhaar-number">
                 Aadhaar Number
               </label>
               <input
@@ -203,7 +204,7 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" for="designation">
+              <label className="block text-gray-600 mb-1" htmlFor="designation">
                 Designation
               </label>
               <select
@@ -245,13 +246,27 @@ const StaffAttendance = () => {
         </div>
       </Modal>
 
-      <div className="container mx-auto mt-3">
+      <StaffAttendanceModal
+        isShowattendanceModal={isShowattendanceModal}
+        setIsShowattendanceModal={setIsShowattendanceModal}
+        staffList={staffList}
+        connectionData={connectionData}
+      />
+
+      <div className="container mx-auto mt-4 flex gap-2">
         <button
           type="button"
           onClick={() => setIsAddStaffModalOpen(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Add Staff
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsShowattendanceModal(true)}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Attendance
         </button>
       </div>
 
@@ -304,7 +319,7 @@ function StaffCards({ staffList, getStaffList }) {
             <StaffInfo icon={<HiDesktopComputer />} data={staff.staff_alloted_lab} />
 
             <FiTrash
-              className="text-red-500"
+              className="text-red-500 cursor-pointer hover:text-red-600 text-xl"
               onClick={handleStaffDelete.bind(null, staff.staff_id)}
             />
           </div>
