@@ -15,6 +15,7 @@ let initialCandidateInfo = {
 
   // Exam Details
   exam_date: '', // Date of the examination
+  exam_time: '', // Time of the examination
   sl_batch_no: '', // Batch number assigned for the examination
   sl_present_status: '', // Attendance or presence status in the exam
 

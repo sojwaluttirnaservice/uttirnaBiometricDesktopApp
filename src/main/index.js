@@ -26,7 +26,7 @@ function createWindow() {
       nodeIntegration: true,
       enableRemoteModule: true,
       webSecurity: false, // Temporarily disable web security (not recommended for production)
-      devTools: false
+      devTools: true
     }
   })
 
@@ -55,13 +55,13 @@ function createWindow() {
 app.whenReady().then(() => {
   // This below setting is for camera
   // const ses = session.fromPartition('persist:name')
-  const ses = session.defaultSession; // Using default session
+  const ses = session.defaultSession // Using default session
   ses.setPermissionRequestHandler((webContents, permission, callback) => {
     if (permission === 'media') {
       callback(true) // Allow media permissions (camera)
     } else {
       callback(false) // Deny other permissions
-   }
+    }
   })
 
   // Camera settign end

@@ -32,9 +32,7 @@ export const ModalHeader = ({ title, onClose }) => {
 
 // ModalBody - The body section with scrollable content
 export const ModalBody = ({ children, isScrollable }) => {
-  return (
-    <div className={`mt-4 grow ${isScrollable ? 'overflow-y-auto' : ''}`}>{children}</div>
-  )
+  return <div className={`mt-4 grow ${isScrollable ? 'overflow-y-auto' : ''}`}>{children}</div>
 }
 
 // ModalFooter - The footer with action buttons
@@ -73,7 +71,7 @@ const Modal = ({
         <ModalBody isScrollable={isScrollable}>
           <p className="text-sm text-gray-500">{children}</p>
         </ModalBody>
-        <ModalFooter onConfirm={onConfirm} onClose={onClose} />
+        {/* <ModalFooter onConfirm={onConfirm} onClose={onClose} /> */}
       </ModalDialog>
     </div>
   )

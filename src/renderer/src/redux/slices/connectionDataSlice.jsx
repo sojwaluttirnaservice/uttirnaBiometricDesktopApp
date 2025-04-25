@@ -6,7 +6,8 @@ const intialConnectionData = {
   // status: 'Connected',
   protocol: '',
   port: '',
-  backendUrl: ``
+  backendUrl: ``,
+  isSidebarOpen: false
 }
 
 const connectionDataSlice = createSlice({
@@ -18,10 +19,13 @@ const connectionDataSlice = createSlice({
     },
     resetConnectionData: (state, action) => {
       return { ...intialConnectionData }
+    },
+    toggleSidebar: (state, action) => {
+      state.isSidebarOpen = action.payload
     }
   }
 })
 
-export const { setConnectionData, resetConnectionData } = connectionDataSlice.actions
+export const { setConnectionData, resetConnectionData, toggleSidebar } = connectionDataSlice.actions
 
 export default connectionDataSlice.reducer

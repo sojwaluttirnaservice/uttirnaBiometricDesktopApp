@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react'
 import { showSuccessToast, showWarningToast } from '../../ui/Toasts'
 import { useDispatch } from 'react-redux'
 import { setConnectionData } from '../../redux/slices/connectionDataSlice'
+import { useNavigate } from 'react-router-dom'
 
 const CheckConnectionModal = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const initialBackendConnectionData = {
     protocol: 'http',
@@ -69,6 +71,7 @@ const CheckConnectionModal = () => {
         setIsConnecting(false)
 
         localStorage.setItem('backendConnectionData', JSON.stringify(backendConnectionData))
+        navigate('/candidate-attendance')
       } else {
         showWarningToast('Connection failed')
       }
