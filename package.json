@@ -56,7 +56,8 @@
     "win": {
       "requestedExecutionLevel": "requireAdministrator",
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ],
       "icon": "bio.ico"
     },

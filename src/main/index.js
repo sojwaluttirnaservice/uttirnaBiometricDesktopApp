@@ -1,17 +1,31 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, session } from 'electron'
+app.disableHardwareAcceleration()
+app.commandLine.appendSwitch('disable-gpu')
+app.commandLine.appendSwitch('disable-software-rasterizer')
+
+import { shell, BrowserWindow, ipcMain } from 'electron'
+
+
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { session } from 'electron'
 
 // Automatically enable the debugger in production mode
 if (process.env.NODE_ENV === 'production') {
   console.log('Running in production mode with debugger enabled')
   // Append the --inspect flag for debugging
   app.commandLine.appendSwitch('inspect', '9229')
+
 }
 
+console.log('App starting... process.env.NODE_ENV:', process.env.NODE_ENV)
+console.log('App path:', app.getAppPath())
+console.log('App is packaged:', app.isPackaged)
+
+
 function createWindow() {
+  console.log('Creating main window...')
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -31,6 +45,8 @@ function createWindow() {
   })
 
   mainWindow.on('ready-to-show', () => {
+    console.log('Main window is ready to show')
+
     mainWindow.show()
   })
 
@@ -42,8 +58,12 @@ function createWindow() {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    console.log('Development mode detected, loading URL:', process.env['ELECTRON_RENDERER_URL'])
+
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
+    console.log('Production mode, loading local file:', join(__dirname, '../renderer/index.html'))
+
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
   // mainWindow.webContents.openDevTools()
