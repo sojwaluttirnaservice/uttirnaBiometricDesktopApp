@@ -97,8 +97,8 @@ const StaffAttendance = () => {
           })
         )
       }
-      setIsAddStaffModalOpen(false)
       getStaffList()
+      handleStaffRegistrationModalClose()
     } catch (err) {
       console.error(err.response.data.message, '-err')
       showErrorToast(err?.response?.data?.message || 'Something went wrong')
@@ -119,7 +119,6 @@ const StaffAttendance = () => {
   }
 
   function handleStaffRegistrationModalClose() {
-    setIsAddStaffModalOpen(false)
     dispatch(
       setWebcamImage({
         snapshotCaptured: false,
@@ -127,6 +126,7 @@ const StaffAttendance = () => {
         justMarkedPresent: false
       })
     )
+    setIsAddStaffModalOpen(false)
   }
 
   return (
