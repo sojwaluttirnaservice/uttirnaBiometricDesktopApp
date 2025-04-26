@@ -3,11 +3,18 @@ import { useSelector } from 'react-redux'
 import NoImageAvailabePlaceholderImage from '../../../assets/static-images/no-image-placeholder.svg.png'
 import ErrorModal from '../../modals/confirmationModals/ErrorModal'
 
-const Video2 = ({ webcamImage, setWebcamImage, markStaffAttendance, staff_id }) => {
+const Video2 = ({
+  webcamImage,
+  setWebcamImage,
+  markStaffAttendance,
+  staff_id,
+  isCapturePhotoModalOpen
+}) => {
   const connectionData = useSelector((state) => state.connectionData)
 
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
+  const tracksRef = useRef(null)
 
   const [cameraError, setCameraError] = useState('')
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false)
@@ -23,6 +30,7 @@ const Video2 = ({ webcamImage, setWebcamImage, markStaffAttendance, staff_id }) 
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+      tracksRef.current = stream
       const video = videoRef.current
 
       if (video) {
@@ -118,6 +126,20 @@ const Video2 = ({ webcamImage, setWebcamImage, markStaffAttendance, staff_id }) 
       currentAttendanceStaffId: staff_id
     })
   }
+
+  useEffect(() => {
+    if (!isCapturePhotoModalOpen && tracksRef.current) {
+      tracksRef.current.getTracks().forEach((track) => track.stop())
+    }
+  }, [isCapturePhotoModalOpen])
+
+  useEffect(() => {
+    return () => {
+      if (tracksRef?.current) {
+        tracksRef.current.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [])
 
   return (
     <>

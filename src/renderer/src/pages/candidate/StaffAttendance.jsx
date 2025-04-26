@@ -118,9 +118,24 @@ const StaffAttendance = () => {
     return `${connectionData.backendUrl}/${candidateInfo.candidateImageRelativePath}/${replaceColonsToUnderscore(img)}`
   }
 
+  function handleStaffRegistrationModalClose() {
+    setIsAddStaffModalOpen(false)
+    dispatch(
+      setWebcamImage({
+        snapshotCaptured: false,
+        capturedWebcamImagePath: '',
+        justMarkedPresent: false
+      })
+    )
+  }
+
   return (
     <>
-      <Modal isOpen={isAddStaffModalOpen} title="Staff Registration">
+      <Modal
+        isOpen={isAddStaffModalOpen}
+        title="Staff Registration"
+        onClose={handleStaffRegistrationModalClose}
+      >
         <div className="container mx-auto w-[80vw] grid grid-cols-2">
           <div className="">
             <div className="p-4">
@@ -236,7 +251,7 @@ const StaffAttendance = () => {
               </button>
 
               <button
-                onClick={() => setIsAddStaffModalOpen(false)}
+                onClick={handleStaffRegistrationModalClose}
                 className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all"
               >
                 Close
@@ -276,7 +291,6 @@ const StaffAttendance = () => {
 }
 
 function StaffCards({ staffList, getStaffList }) {
-  console.log(staffList)
   const connectionData = useSelector((state) => state.connectionData)
 
   const handleStaffDelete = async (staffId) => {

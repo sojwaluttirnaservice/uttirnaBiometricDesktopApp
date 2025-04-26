@@ -69,7 +69,6 @@ function StaffAttendanceModal({
       const formData = new FormData()
 
       let staffPhoto = dataURLToBlob(webcamImage.capturedWebcamImagePath)
-      let shift = 1
       formData.set('staff_id', staffId)
       formData.set('shift', batchDropdownRef.current.value)
       formData.set('staff_photo', staffPhoto)
@@ -133,6 +132,10 @@ function StaffAttendanceModal({
       setWebcamImage(initialWebcamImageState)
     }
   }
+
+  useEffect(() => {
+    setStaffListWithAttendance([])
+  }, [isShowattendanceModal])
 
   return (
     <>
@@ -241,7 +244,10 @@ function StaffAttendanceModal({
       <Modal
         isOpen={isCapturePhotoModalOpen}
         title="Capture Photo"
-        onClose={() => setIsCapturePhotoModalOpen(false)}
+        onClose={() => {
+          setWebcamImage(initialWebcamImageState)
+          setIsCapturePhotoModalOpen(false)
+        }}
       >
         <div className="min-w-[30vw] p-3">
           <Video2
@@ -249,6 +255,7 @@ function StaffAttendanceModal({
             setWebcamImage={setWebcamImage}
             webcamImage={webcamImage}
             staff_id={webcamImage.currentAttendanceStaffId}
+            isCapturePhotoModalOpen={isCapturePhotoModalOpen}
           />
         </div>
       </Modal>
