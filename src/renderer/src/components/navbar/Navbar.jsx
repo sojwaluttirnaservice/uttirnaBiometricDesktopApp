@@ -23,9 +23,6 @@ const Navbar = (props, inputRef) => {
   const connectionData = useSelector((state) => state.connectionData)
   const [batches, setBatches] = useState([])
 
-  // STORE SELECTED CANDIDATE ID
-  const [candidateId, setCandidateId] = useState('')
-
   // SELECT BATCH AND LAB
   const [batch, setBatch] = useState('')
   const [lab, setLab] = useState('')
@@ -46,7 +43,6 @@ const Navbar = (props, inputRef) => {
     return () => {
       localStorage.removeItem('batch')
       localStorage.removeItem('lab')
-      setCandidateId(null)
     }
   }, [])
 
@@ -87,7 +83,7 @@ const Navbar = (props, inputRef) => {
     e.preventDefault()
     e.stopPropagation()
     try {
-      if (!candidateId || isNaN(candidateId)) {
+      if (!inputRef.current.value || isNaN(inputRef.current.value)) {
         showWarningToast('Please enter a valid candidate id')
         return
       }
@@ -100,7 +96,7 @@ const Navbar = (props, inputRef) => {
       let endpoint = `${connectionData.backendUrl}/api/attendence/v1/student-details`
       const { data: resData } = await axios.post(endpoint, {
         batch,
-        id: candidateId,
+        id: inputRef.current.value,
         labName: lab
       })
 
@@ -135,8 +131,8 @@ const Navbar = (props, inputRef) => {
         showWarningToast(message || 'Failed to fetch data')
       }
     } catch (err) {
-      console.error(`Error while fetching the candidate details: ${err}`)
-      showErrorToast(err?.message || 'Something went wrong')
+      const er = err?.response?.data
+      showErrorToast(er?.message || 'Something went wrong')
     }
   }
 
@@ -199,8 +195,7 @@ const Navbar = (props, inputRef) => {
                         placeholder="Search candidate..."
                         autoComplete="off"
                         className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48  text-md border border-gray-300 rounded-xl"
-                        value={candidateId}
-                        onChange={(e) => setCandidateId(e.target.value)}
+                        // onChange={(e) => setCandidateId(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             handleFetchCandidateData(e)

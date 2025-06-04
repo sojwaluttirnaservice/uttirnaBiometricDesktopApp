@@ -1,17 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import NoImageAvailabePlaceholderImage from '../../../assets/static-images/no-image-placeholder.svg.png'
 import { setWebcamImage } from '../../../redux/slices/candidateSlice'
 import ErrorModal from '../../modals/confirmationModals/ErrorModal'
 
-const Video = () => {
+const WebCamera = ({
+  cameraControlsRef,
+  isShowWebCam,
+  capturedImagePath,
+  isShowCapturedImage,
+  isShowFetchedImage,
+  fetchedImageRelativePath,
+  fetchedImageName
+}) => {
+  console.log(cameraControlsRef, '-ref')
   const connectionData = useSelector((state) => state.connectionData)
   const dispatch = useDispatch()
 
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
-
-  const candidateInfo = useSelector((state) => state.candidateInfo)
 
   const [cameraError, setCameraError] = useState('')
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false)
@@ -50,9 +57,12 @@ const Video = () => {
       setIsRetrying(false) // Reset retry status after operation
     }
   }
+
   useEffect(() => {
     accessCamera() // Try to access camera on mount or when these states change
-  }, [candidateInfo.id, candidateInfo.snapshotCaptured, candidateInfo.justMarkedPresent])
+  }, [isShowWebCam])
+
+  // }, [candidateInfo.id, candidateInfo.snapshotCaptured, candidateInfo.justMarkedPresent])
 
   const handleRetryAction = () => {
     accessCamera() // Retry camera access
@@ -98,8 +108,13 @@ const Video = () => {
     drawCrop()
   }
 
+  useImperativeHandle(cameraControlsRef, () => ({
+    handleResetSnap,
+    handleTakeSnap
+  }))
+
   const handleTakeSnap = (e) => {
-    e.preventDefault()
+    e?.preventDefault()
     const canvas = canvasRef.current
     if (canvas) {
       const dataUrl = canvas.toDataURL('image/jpeg') // Change 'image/jpeg' to 'image/png' if needed
@@ -115,7 +130,7 @@ const Video = () => {
   }
 
   const handleResetSnap = (e) => {
-    e.preventDefault()
+    e?.preventDefault()
     dispatch(
       setWebcamImage({
         snapshotCaptured: false,
@@ -152,19 +167,17 @@ const Video = () => {
         2. And if attendance is not marked & when we have not captured the image on local or not just captured
         ) */}
 
-          {candidateInfo.sl_present_status != 1 &&
-            !candidateInfo.snapshotCaptured &&
-            !candidateInfo.justMarkedPresent && (
-              <>
-                <canvas
-                  ref={canvasRef}
-                  style={{
-                    border: '',
-                    display: 'block'
-                  }}
-                />
-              </>
-            )}
+          {isShowWebCam && (
+            <>
+              <canvas
+                ref={canvasRef}
+                style={{
+                  border: '',
+                  display: 'block'
+                }}
+              />
+            </>
+          )}
 
           {/* CONDITION 1 */}
 
@@ -172,12 +185,12 @@ const Video = () => {
         1. Candidate attendance statsu is fetched from the server
         2. Candidate has already captured webcam image
         3. Image is not capture just now i.e. on local just now*/}
-          {candidateInfo.sl_present_status == 1 && !candidateInfo.justMarkedPresent && (
+          {isShowFetchedImage && (
             <>
               <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
                 <img
                   id="student-image"
-                  src={`${connectionData.backendUrl}/${candidateInfo.candidateWebcamImageRelativePath}/${candidateInfo.sl_cam_image}`}
+                  src={`${connectionData.backendUrl}/${fetchedImageRelativePath}/${fetchedImageName}`}
                   onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
                   className="w-full h-full"
                 />
@@ -188,42 +201,15 @@ const Video = () => {
           {/* CONDITION 2 */}
           {/* If snapshot captured and or just marked present, show the capture image url
            */}
-          {(candidateInfo.snapshotCaptured || candidateInfo.justMarkedPresent) && (
+          {isShowCapturedImage && (
             <>
-              <img src={candidateInfo.capturedWebcamImagePath} alt="" />
+              <img src={capturedImagePath} alt="" />
             </>
           )}
-
-          <div>
-            {/*Buttons wont be visible if and only attendance is not marked */}
-            {candidateInfo.sl_present_status != 1 && (
-              <>
-                <div className="flex flex-col gap-4 ">
-                  <button
-                    type="button"
-                    className="px-8 py-4 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    id="take-snap-btn"
-                    onClick={handleTakeSnap}
-                  >
-                    Take Snap
-                  </button>
-
-                  <button
-                    type="button"
-                    id="reset-btn"
-                    className="px-8 py-4 border border-transparent text-lg font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={handleResetSnap}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </>
   )
 }
 
-export default Video
+export default WebCamera

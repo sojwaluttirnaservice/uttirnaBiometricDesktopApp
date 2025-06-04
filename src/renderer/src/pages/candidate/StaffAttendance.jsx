@@ -168,6 +168,7 @@ const StaffAttendance = () => {
                 type="tel"
                 id="mobile"
                 name="staff_contact_number"
+                maxLength={10}
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
@@ -210,10 +211,10 @@ const StaffAttendance = () => {
                 Aadhaar Number
               </label>
               <input
-                type="number"
+                type="text"
                 id="aadhaar-number"
                 name="staff_aadhar_number"
-                maxLength="12"
+                maxLength={12}
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>

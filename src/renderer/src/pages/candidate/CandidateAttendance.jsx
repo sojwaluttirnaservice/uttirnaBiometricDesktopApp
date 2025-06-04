@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef, useEffect, useRef } from 'react'
 import Video from '../../components/candidate/video/Video'
 import { useDispatch, useSelector } from 'react-redux'
 import CandidateInfo from '../../components/candidate/candidateInfo/CandidateInfo'
@@ -12,12 +12,14 @@ import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
 
 import NoImageAvailabePlaceholderImage from '../../assets/static-images/no-image-placeholder.svg.png'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
+import WebCamera from '../../components/candidate/video/WebCamera'
 
 const CandidateAttendance = (props, inputRef) => {
+  const dispatch = useDispatch()
+  const cameraControlsRef = useRef(null)
+
   const candidateInfo = useSelector((state) => state.candidateInfo)
   const connectionData = useSelector((state) => state.connectionData)
-
-  const dispatch = useDispatch()
 
   const handleMarkCandidateAttendance = async (e) => {
     e?.preventDefault?.()
@@ -81,6 +83,7 @@ const CandidateAttendance = (props, inputRef) => {
 
     return () => {
       // Clean up the event listener on component unmount
+      console.log('Cleaning up...')
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [candidateInfo.snapshotCaptured])
@@ -154,16 +157,72 @@ const CandidateAttendance = (props, inputRef) => {
               </div>
 
               {/* Right part for photo capturing */}
-              <div className="shadow-md rounded-[2rem] py-4 px-12">
-                <div className="flex items-center justify-between">
-                  <Video />
+              <div className="shadow-md rounded-[2rem] py-4 px-12 grid gap-3 grid-cols-2">
+                <div className="justify-self-center">
+                  <WebCamera
+                    cameraControlsRef={cameraControlsRef}
+                    isShowWebCam={
+                      candidateInfo.sl_present_status != 1 &&
+                      !candidateInfo.snapshotCaptured &&
+                      !candidateInfo.justMarkedPresent
+                    }
+                    isShowCapturedImage={
+                      candidateInfo.snapshotCaptured || candidateInfo.justMarkedPresent
+                    }
+                    capturedImagePath={candidateInfo.capturedWebcamImagePath}
+                    isShowFetchedImage={
+                      candidateInfo.sl_present_status == 1 && !candidateInfo.justMarkedPresent
+                    }
+                    fetchedImageRelativePath={candidateInfo.candidateWebcamImageRelativePath}
+                    fetchedImageName={candidateInfo.sl_cam_image}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2 justify-self-center">
+                  {/*Buttons wont be visible if and only attendance is not marked */}
+                  {candidateInfo.sl_present_status != 1 && (
+                    <>
+                      <button
+                        type="button"
+                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        id="take-snap-btn"
+                        onClick={() => cameraControlsRef.current?.handleTakeSnap()}
+                      >
+                        Take Snap!
+                      </button>
+
+                      <button
+                        type="button"
+                        id="reset-btn"
+                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        onClick={() => cameraControlsRef.current?.handleResetSnap()}
+                      >
+                        Reset
+                      </button>
+
+                      <button
+                        type="button"
+                        id="mark-present-btn"
+                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        onClick={handleMarkCandidateAttendance}
+                      >
+                        Mark Present
+                      </button>
+                    </>
+                  )}
+
+                  {candidateInfo.sl_present_status == 1 && (
+                    <div className="px-8 py-4 text-center border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                      This candidate already marked present
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Part for marking attendance or not */}
 
-            {candidateInfo.sl_present_status != 1 && (
+            {/* {candidateInfo.sl_present_status != 1 && (
               <div className="status-buttons ">
                 <div className="w-full flex justify-center gap-6 mt-6">
                   <button
@@ -183,29 +242,10 @@ const CandidateAttendance = (props, inputRef) => {
                     Reject
                   </button>
 
-                  <button
-                    type="button"
-                    id="reset-page-btn"
-                    className="hidden inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Reset Page
-                  </button>
+                 
                 </div>
               </div>
-            )}
-
-            {candidateInfo.sl_present_status == 1 && (
-              <div className="status-buttons ">
-                <div className="w-full flex justify-center gap-6 mt-6">
-                  <div
-                    className="inline-flex items-center animate-pulse px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={handleMarkCandidateAttendance}
-                  >
-                    This candidate already marked present
-                  </div>
-                </div>
-              </div>
-            )}
+            )} */}
           </div>
         </>
       )}
