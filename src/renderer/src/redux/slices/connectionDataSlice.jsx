@@ -7,7 +7,8 @@ const intialConnectionData = {
   protocol: '',
   port: '',
   backendUrl: ``,
-  isSidebarOpen: false
+  isSidebarOpen: false,
+  projectConfig: []
 }
 
 const connectionDataSlice = createSlice({

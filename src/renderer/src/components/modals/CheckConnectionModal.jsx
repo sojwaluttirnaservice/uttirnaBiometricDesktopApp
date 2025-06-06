@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { showSuccessToast, showWarningToast } from '../../ui/Toasts'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setConnectionData } from '../../redux/slices/connectionDataSlice'
 import { useNavigate } from 'react-router-dom'
 
@@ -56,7 +56,8 @@ const CheckConnectionModal = () => {
         cancelToken: source.token
       })
 
-      const { success, call, message } = resData
+      const { success, call, message, data } = resData
+      console.log(data, '=data=check data')
 
       if (success || call) {
         showSuccessToast(message || 'Successfully Connected')
@@ -64,7 +65,8 @@ const CheckConnectionModal = () => {
           setConnectionData({
             ...backendConnectionData,
             status: 'Connected',
-            backendUrl: constructedBackendUrl
+            backendUrl: constructedBackendUrl,
+            projectConfig: data
           })
         )
 

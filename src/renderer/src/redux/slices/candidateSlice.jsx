@@ -23,6 +23,7 @@ let initialCandidateInfo = {
   sl_image: '', // Path to the candidate's saved image
   sl_sign: '', // Path to the candidate's saved signature
   sl_cam_image: '', // Path to the candidate's image captured on camera
+  sl_qr_image: '', // Path to the candidates' qr captured image
   lab_name: '',
   lab_no: '',
   department: '',
@@ -35,6 +36,7 @@ let initialCandidateInfo = {
   // Relative Paths for Media (optional but included for clarity)
   candidateImageRelativePath: 'pics/_images', // Relative path for the candidate's image
   candidateSignRelativePath: 'pics/_sign', // Relative path for the candidate's signature,
+  candidateQRPhotoRelativePath: 'pics/_qr_captured', // Relative path for the candidate's qr captured photo,
   candidateWebcamImageRelativePath: '/pics/_webcam_images/'
 }
 

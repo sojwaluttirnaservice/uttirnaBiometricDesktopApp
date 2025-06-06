@@ -1,18 +1,17 @@
-import React, { forwardRef, useEffect, useRef } from 'react'
-import Video from '../../components/candidate/video/Video'
-import { useDispatch, useSelector } from 'react-redux'
-import CandidateInfo from '../../components/candidate/candidateInfo/CandidateInfo'
-import AttendanceInfo from '../../components/candidate/attendancdInfo/attendanceInfo'
-import { showErrorToast, showSuccessToast } from '../../ui/Toasts'
 import axios from 'axios'
-import { setCandidateAttendanceStatus, setWebcamImage } from '../../redux/slices/candidateSlice'
-import dataURLToBlob from '../../utility/dataUrlToBlob'
-import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
+import { forwardRef, useEffect, useMemo, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import AttendanceInfo from '../../components/candidate/attendancdInfo/attendanceInfo'
+import CandidateInfo from '../../components/candidate/candidateInfo/CandidateInfo'
 import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
+import { setCandidateAttendanceStatus, setWebcamImage } from '../../redux/slices/candidateSlice'
+import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
+import { showErrorToast, showSuccessToast } from '../../ui/Toasts'
+import dataURLToBlob from '../../utility/dataUrlToBlob'
 
 import NoImageAvailabePlaceholderImage from '../../assets/static-images/no-image-placeholder.svg.png'
-import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 import WebCamera from '../../components/candidate/video/WebCamera'
+import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 
 const CandidateAttendance = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -20,6 +19,14 @@ const CandidateAttendance = (props, inputRef) => {
 
   const candidateInfo = useSelector((state) => state.candidateInfo)
   const connectionData = useSelector((state) => state.connectionData)
+
+  const isQrScanAllow = useMemo(() => {
+    if (connectionData?.projectConfig?.length > 0) {
+      return connectionData.projectConfig.filter((_configKey) => {
+        return _configKey.config_key == 'is_qr_scan_allow'
+      })
+    }
+  })
 
   const handleMarkCandidateAttendance = async (e) => {
     e?.preventDefault?.()
@@ -96,9 +103,9 @@ const CandidateAttendance = (props, inputRef) => {
     return item.split('/').pop().replaceAll(':', '_')
   }
 
-  function getImage(img) {
+  function getImage(img, path) {
     if (!img) return null
-    return `${connectionData.backendUrl}/${candidateInfo.candidateImageRelativePath}/${replaceColonsToUnderscore(img)}`
+    return `${connectionData.backendUrl}/${path}/${replaceColonsToUnderscore(img)}`
   }
 
   return (
@@ -133,20 +140,42 @@ const CandidateAttendance = (props, inputRef) => {
                   id="already-uploaded-container"
                   className="photos-container rounded-[2rem] flex items-center justify-center gap-2"
                 >
+                  {/* <!--QR CAPTURED IMAGE HERE --> */}
+                  {isQrScanAllow?.length > 0 && isQrScanAllow[0]?.config_value === 'YES' && (
+                    <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
+                      <img
+                        id="student-qr-image"
+                        src={getImage(
+                          candidateInfo?.sl_qr_image,
+                          candidateInfo.candidateQRPhotoRelativePath
+                        )}
+                        onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
+                        className="w-full h-full"
+                      />
+                    </div>
+                  )}
+
                   {/* <!--ALREADY UPLOADED IMAGE HERE --> */}
                   <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
                     <img
                       id="student-image"
-                      src={getImage(candidateInfo?.sl_image)}
+                      src={getImage(
+                        candidateInfo?.sl_image,
+                        candidateInfo.candidateImageRelativePath
+                      )}
                       onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
                       className="w-full h-full"
                     />
                   </div>
+
                   {/* <!-- ALREADY UPLOADED SIGN HERE --> */}
                   <div className="sign-holder w-[17rem] h-[6rem] border rounded-xl overflow-hidden">
                     <img
                       id="student-sign"
-                      src={getImage(candidateInfo?.sl_sign)}
+                      src={getImage(
+                        candidateInfo?.sl_sign,
+                        candidateInfo.candidateImageRelativePath
+                      )}
                       onError={(e) => {
                         e.target.src = NoImageAvailabePlaceholderImage
                       }}
