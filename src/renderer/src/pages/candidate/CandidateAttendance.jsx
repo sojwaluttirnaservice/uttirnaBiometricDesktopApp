@@ -23,7 +23,7 @@ const CandidateAttendance = (props, inputRef) => {
   const isQrScanAllow = useMemo(() => {
     if (connectionData?.projectConfig?.length > 0) {
       return connectionData.projectConfig.filter((_configKey) => {
-        return _configKey.config_key == 'is_qr_scan_allow'
+        return _configKey.config_key == 'is_allow_qr_scan'
       })
     }
   })
