@@ -15,6 +15,7 @@ import { HiDesktopComputer } from 'react-icons/hi'
 import StaffAttendanceModal from './StaffAttendanceModal'
 
 const StaffAttendance = () => {
+  const labNameRef = useRef(null)
   const staffFormDataRef = useRef(null)
   const candidateInfo = useSelector((state) => state.candidateInfo)
   const connectionData = useSelector((state) => state.connectionData)
@@ -23,6 +24,7 @@ const StaffAttendance = () => {
   const [isShowattendanceModal, setIsShowattendanceModal] = useState(false)
   const [labsList, setLabsList] = useState([])
   const [staffList, setStaffList] = useState([])
+  const [staffDesignationList, setStaffDesignationList] = useState([])
 
   const dispatch = useDispatch()
 
@@ -49,6 +51,18 @@ const StaffAttendance = () => {
     }
   }
 
+  const getStaffDesignationList = async () => {
+    try {
+      const url = `${connectionData.backendUrl}/api/staff/v1/designation-list`
+      const { data: resData } = await axios.get(url)
+      console.log({ resData })
+      setStaffDesignationList(resData?.data || [])
+    } catch (err) {
+      console.error(`Error while getting staff list: ${err}`)
+      showErrorToast(err?.message || 'Something went wrong')
+    }
+  }
+
   useEffect(() => {
     getStaffList()
   }, [])
@@ -56,6 +70,7 @@ const StaffAttendance = () => {
   useEffect(() => {
     if (isAddStaffModalOpen) {
       getLabsList()
+      getStaffDesignationList()
     }
   }, [isAddStaffModalOpen])
 
@@ -71,6 +86,11 @@ const StaffAttendance = () => {
       const url = `${connectionData.backendUrl}/api/staff/v1/save-details `
 
       const formData = new FormData(staffFormDataRef.current)
+
+      formData.set(
+        'isDesignationRequiredLabDetails',
+        Boolean(isDesignationRequiredLabDetails(formData.get('staff_designation')))
+      )
 
       let candidatePhoto = dataURLToBlob(candidateInfo.capturedWebcamImagePath)
       formData.set('staff_photo', candidatePhoto)
@@ -129,6 +149,23 @@ const StaffAttendance = () => {
     setIsAddStaffModalOpen(false)
   }
 
+  const handleDesignationChange = (e) => {
+    labNameRef.current.disabled = !isDesignationRequiredLabDetails(e.target.value)
+  }
+
+  const isDesignationRequiredLabDetails = (role_id) => {
+    const selectedDesignation = getSingleDesignationDetails(Number(role_id))
+    if (selectedDesignation.length !== 0) {
+      const isLabRequired = selectedDesignation[0].is_lab_required === 'YES'
+      return isLabRequired
+    }
+    return false
+  }
+
+  const getSingleDesignationDetails = (role_id) => {
+    return staffDesignationList.filter((_el) => _el.role_id === role_id)
+  }
+
   return (
     <>
       <Modal
@@ -174,27 +211,6 @@ const StaffAttendance = () => {
             </div>
 
             <div>
-              <label className="block text-gray-600 mb-1" htmlFor="alloted-lab">
-                Lab
-              </label>
-              <select
-                id="alloted-lab"
-                name="staff_alloted_lab"
-                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="">---Select---</option>
-                {labsList.length > 0 &&
-                  labsList?.map((lab) => {
-                    return (
-                      <option value={`${lab.lab_name}`}>
-                        ({lab.lab_no}) {lab.lab_name}
-                      </option>
-                    )
-                  })}
-              </select>
-            </div>
-
-            <div>
               <label className="block text-gray-600 mb-1" htmlFor="email">
                 Email
               </label>
@@ -226,19 +242,36 @@ const StaffAttendance = () => {
               <select
                 id="designation"
                 name="staff_designation"
+                onChange={handleDesignationChange}
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">---Select---</option>
-                {[
-                  'Venue Head',
-                  'IT Manager',
-                  'Invigilator',
-                  'Electrician',
-                  'House Keeping Staff',
-                  'Security'
-                ].map((_el) => {
-                  return <option value={_el}>{_el}</option>
-                })}
+                {staffDesignationList.length > 0 &&
+                  staffDesignationList.map((_el) => {
+                    return <option value={_el.role_id}>{_el.name}</option>
+                  })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-600 mb-1" htmlFor="alloted-lab">
+                Lab
+              </label>
+              <select
+                id="alloted-lab"
+                name="staff_alloted_lab"
+                ref={labNameRef}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="">---Select---</option>
+                {labsList.length > 0 &&
+                  labsList?.map((lab) => {
+                    return (
+                      <option value={`${lab.lab_name}`}>
+                        ({lab.lab_no}) {lab.lab_name}
+                      </option>
+                    )
+                  })}
               </select>
             </div>
 
@@ -331,7 +364,9 @@ function StaffCards({ staffList, getStaffList }) {
 
             <StaffInfo icon={<MdOutlineMailOutline />} data={staff.staff_email} />
 
-            <StaffInfo icon={<HiDesktopComputer />} data={staff.staff_alloted_lab} />
+            {staff?.staff_alloted_lab && (
+              <StaffInfo icon={<HiDesktopComputer />} data={staff?.staff_alloted_lab} />
+            )}
 
             <FiTrash
               className="text-red-500 cursor-pointer hover:text-red-600 text-xl"

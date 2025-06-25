@@ -1,11 +1,10 @@
+import axios from 'axios'
 import { memo, useEffect, useRef, useState } from 'react'
-import Modal from '../../components/modals/BasicModal'
-import Video from '../../components/candidate/video/Video'
-import Video2 from '../../components/candidate/video/Video2'
 import { BiCamera } from 'react-icons/bi'
+import Video2 from '../../components/candidate/video/Video2'
+import Modal from '../../components/modals/BasicModal'
 import { showErrorToast, showSuccessToast } from '../../ui/Toasts'
 import dataURLToBlob from '../../utility/dataUrlToBlob'
-import axios from 'axios'
 
 const initialWebcamImageState = {
   snapshotCaptured: false,
