@@ -4,19 +4,53 @@ import { showSuccessToast, showWarningToast } from '../../ui/Toasts'
 import { useDispatch, useSelector } from 'react-redux'
 import { setConnectionData } from '../../redux/slices/connectionDataSlice'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod/v4'
+import { formatZodErrors } from '../../utility/help'
+import InputError from '../../ui/InputError'
+import { ROLES } from '../../utility/constants'
+
+const initialErrorObject = {
+  protocol: '',
+  ipAddress: '',
+  port: '',
+  role: '',
+  username: '',
+  password: ''
+}
 
 const CheckConnectionModal = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  const LoginValidationSchema = z.object({
+    protocol: z.string({ required_error: 'Protocol must be a string' }),
+    ipAddress: z.string({ required_error: 'Invalid IP address' }),
+    port: z
+      .number({ required_error: 'Port is required' })
+      .min(1, { message: 'Port must be a positive number' }),
+    role: z.enum([ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE, ROLES.BIOMETRIC_STAFF_ATTENDANCE], {
+      errorMap: () => ({ message: 'Invalid role selected' })
+    }),
+    username: z
+      .string({ required_error: 'Username is required' })
+      .min(1, { message: 'Username must be at least 1 characters' }),
+    password: z
+      .string({ required_error: 'Password is required' })
+      .min(1, { message: 'Password must be at least 1 characters' })
+  })
+
   const initialBackendConnectionData = {
     protocol: 'http',
-    ipAddress: '192.168.1.11',
-    port: 3050
+    ipAddress: 'localhost',
+    port: 3050,
+    role: ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE,
+    username: '',
+    password: ''
   }
 
   const [backendConnectionData, setBackendConnectionData] = useState(initialBackendConnectionData)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [errors, setErrors] = useState(initialErrorObject)
   const [cancelTokenSource, setCancelTokenSource] = useState(null) // Store the cancel token source
 
   useEffect(() => {
@@ -32,34 +66,64 @@ const CheckConnectionModal = () => {
   }, [])
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type } = e.target
+
     setBackendConnectionData((prevState) => ({
       ...prevState,
       [name]: value
     }))
   }
 
+  const validateLoginForm = () => {
+    console.log(backendConnectionData, '==backendConnectionData')
+    const isValid = LoginValidationSchema.safeParse(backendConnectionData)
+
+    if (isValid?.success) {
+      setErrors(initialErrorObject)
+      return true
+    }
+
+    const errors = formatZodErrors(isValid.error.format())
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors)
+      return false
+    }
+    return true
+  }
+
   const handleCheckConnection = async (e) => {
     e.preventDefault()
-
-    // Create a new cancel token each time a new request is made
-    const source = axios.CancelToken.source()
-    setCancelTokenSource(source) // Set the cancel token source to state
-
-    setIsConnecting(true) // Show the loading state (disable the button)
+    if (!validateLoginForm()) {
+      return
+    }
+    setIsConnecting(true)
     try {
-      let constructedBackendUrl = `${backendConnectionData.protocol}://${backendConnectionData.ipAddress}:${backendConnectionData.port}`
-      let endpoint = '/api/v1/check-status'
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel('New request made previous is cancled')
+      }
+
+      // Create a new cancel token each time a new request is made
+      const source = axios.CancelToken.source()
+      setCancelTokenSource(source) // Set the cancel token source to state
+
+      const constructedBackendUrl = constructBackendUrl(backendConnectionData)
+      const endpoint = '/api/auth/v1/login'
 
       // Making the API request with the cancel token
-      const { data: resData } = await axios.get(`${constructedBackendUrl}${endpoint}`, {
-        cancelToken: source.token
-      })
+      const { data: resData } = await axios.post(
+        `${constructedBackendUrl}${endpoint}`,
+        { ...backendConnectionData },
+        {
+          cancelToken: source.token
+        }
+      )
 
-      const { success, call, message, data } = resData
+      console.log({ resData })
+
+      const { success, message, data } = resData
       console.log(data, '=data=check data')
 
-      if (success || call) {
+      if (success) {
         showSuccessToast(message || 'Successfully Connected')
         dispatch(
           setConnectionData({
@@ -70,10 +134,15 @@ const CheckConnectionModal = () => {
           })
         )
 
-        setIsConnecting(false)
-
         localStorage.setItem('backendConnectionData', JSON.stringify(backendConnectionData))
-        navigate('/candidate-attendance')
+
+        if (backendConnectionData.role === ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE) {
+          navigate('/candidate-attendance')
+        }
+
+        if (backendConnectionData.role === ROLES.BIOMETRIC_STAFF_ATTENDANCE) {
+          navigate('/staff-attendance')
+        }
       } else {
         showWarningToast('Connection failed')
       }
@@ -106,6 +175,10 @@ const CheckConnectionModal = () => {
     }
   }
 
+  const constructBackendUrl = (backendConnectionData) => {
+    return `${backendConnectionData.protocol}://${backendConnectionData.ipAddress}:${backendConnectionData.port}`
+  }
+
   return (
     <>
       <div className="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center">
@@ -115,7 +188,7 @@ const CheckConnectionModal = () => {
         ></div>
         <div className="relative bg-white rounded-lg shadow-lg overflow-hidden w-96 p-6">
           <div className="border-b-2 mb-4">
-            <h1 className="text-2xl font-bold mb-2">Check Server Connection</h1>
+            <h1 className="text-2xl font-bold mb-2">Login</h1>
           </div>
           <div className="flex flex-col gap-4">
             <div>
@@ -132,6 +205,7 @@ const CheckConnectionModal = () => {
                 <option value="http">http</option>
                 <option value="https">https</option>
               </select>
+              {errors?.protocol && <InputError>{errors.protocol}</InputError>}
             </div>
             <div>
               <label
@@ -149,7 +223,10 @@ const CheckConnectionModal = () => {
                 value={backendConnectionData.ipAddress}
                 onChange={handleInputChange}
               />
+
+              {errors?.ipAddress && <InputError>{errors.ipAddress}</InputError>}
             </div>
+
             <div>
               <label htmlFor="port" className="block text-sm font-medium text-gray-700">
                 Port
@@ -163,6 +240,80 @@ const CheckConnectionModal = () => {
                 value={backendConnectionData.port}
                 onChange={handleInputChange}
               />
+              {errors?.port && <InputError>{errors.port}</InputError>}
+            </div>
+
+            <div className="grid grid-cols-3 items-center">
+              <label htmlFor="" className="block text-sm font-medium text-gray-700 ">
+                User Type
+              </label>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="role"
+                  id="candidate-attendance"
+                  value={ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE}
+                  onChange={handleInputChange}
+                  checked={backendConnectionData.role == ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE}
+                />
+                <label htmlFor="candidate-attendance">User</label>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="role"
+                  id="staff-attendance"
+                  value={ROLES.BIOMETRIC_STAFF_ATTENDANCE}
+                  onChange={handleInputChange}
+                  checked={backendConnectionData.role == ROLES.BIOMETRIC_STAFF_ATTENDANCE}
+                />
+                <label htmlFor="staff-attendance">Admin</label>
+              </div>
+              {errors?.role && <InputError>{errors.role}</InputError>}
+
+              {/* <input
+                type="text"
+                id="port"
+                name="port"
+                className="p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter exam server Id"
+                value={backendConnectionData.role}
+                onChange={handleInputChange}
+              /> */}
+            </div>
+
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                className="p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter Username"
+                value={backendConnectionData?.username}
+                onChange={handleInputChange}
+              />
+              {errors?.username && <InputError>{errors.username}</InputError>}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <input
+                type="text"
+                id="password"
+                name="password"
+                className="p-2 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter Password"
+                value={backendConnectionData?.password}
+                onChange={handleInputChange}
+              />
+              {errors?.password && <InputError>{errors.password}</InputError>}
             </div>
           </div>
           <div className="flex justify-end mt-4 gap-2">
@@ -173,13 +324,7 @@ const CheckConnectionModal = () => {
             >
               {isConnecting ? 'Connecting' : 'Connect'}
             </button>
-            <button
-              className="hidden px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-              onClick={handleCheckConnection}
-              disabled={isConnecting}
-            >
-              Cancel
-            </button>
+
             <button
               className="hidden ml-4 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
               onClick={() => {

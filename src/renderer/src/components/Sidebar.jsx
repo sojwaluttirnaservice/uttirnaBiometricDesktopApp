@@ -3,11 +3,14 @@ import { NavLink } from 'react-router-dom'
 import DangerModal from './modals/confirmationModals/DangerModal'
 import { useDispatch, useSelector } from 'react-redux'
 import { resetConnectionData, toggleSidebar } from '../redux/slices/connectionDataSlice'
+import { ROLES } from '../utility/constants'
 
 function Sidebar() {
   const dispatch = useDispatch()
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
   const isSidebarOpen = useSelector((state) => state.connectionData.isSidebarOpen)
+
+  const role = useSelector((state) => state.connectionData.role)
 
   return (
     <>
@@ -28,25 +31,29 @@ function Sidebar() {
         className={` h-screen bg-gray-800 absolute top-0 z-50 text-white w-64 py-4 px-2  ${isSidebarOpen ? '' : 'hidden'}`}
       >
         <ul className="flex flex-col gap-3">
-          <NavLink
-            onClick={() => dispatch(toggleSidebar(false))}
-            to={'/candidate-attendance'}
-            className={({ isActive }) =>
-              `cursor-pointer hover:bg-gray-700 py-3 px-2 ${isActive ? 'bg-gray-600' : ''}`
-            }
-          >
-            Candidate Attendance
-          </NavLink>
+          {role === ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE && (
+            <NavLink
+              onClick={() => dispatch(toggleSidebar(false))}
+              to={'/candidate-attendance'}
+              className={({ isActive }) =>
+                `cursor-pointer hover:bg-gray-700 py-3 px-2 ${isActive ? 'bg-gray-600' : ''}`
+              }
+            >
+              Candidate Attendance
+            </NavLink>
+          )}
 
-          <NavLink
-            onClick={() => dispatch(toggleSidebar(false))}
-            to={'/staff-attendance'}
-            className={({ isActive }) =>
-              `cursor-pointer hover:bg-gray-700 py-3 px-2 ${isActive ? 'bg-gray-600' : ''}`
-            }
-          >
-            Staff Attendance
-          </NavLink>
+          {role === ROLES.BIOMETRIC_STAFF_ATTENDANCE && (
+            <NavLink
+              onClick={() => dispatch(toggleSidebar(false))}
+              to={'/staff-attendance'}
+              className={({ isActive }) =>
+                `cursor-pointer hover:bg-gray-700 py-3 px-2 ${isActive ? 'bg-gray-600' : ''}`
+              }
+            >
+              Staff Attendance
+            </NavLink>
+          )}
 
           <li
             className="cursor-pointer hover:bg-gray-700 py-3 px-2"
