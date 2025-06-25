@@ -120,15 +120,20 @@ const CandidateInfo = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 ">
-              <i className="fa-solid fa-id-card text-xl text-[#43A7FF]"></i>
-              <div>
-                <div className="label font-semibold text-[#555] text-md">Lab / Computer</div>
-                <div className="value font-semibold text-lg text-[#43A7FF]" id="post">
-                  {candidateInfo.lab_name} / {candidateInfo.pc_no}
+            {candidateInfo?.sl_present_status === 1 && (
+              <div className="flex items-center gap-3 ">
+                <i className="fa-solid fa-id-card text-xl text-[#43A7FF]"></i>
+                <div>
+                  <div className="label font-semibold text-[#555] text-md">Lab / Computer</div>
+                  <div
+                    className="value font-semibold text-lg te-xt-[#43A7FF] text-[#fff] rounded-xl bg-indigo-400 py-1 px-2"
+                    id="post"
+                  >
+                    {candidateInfo.lab_name} / {candidateInfo.pc_no}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

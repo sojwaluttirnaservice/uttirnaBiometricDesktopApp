@@ -140,9 +140,22 @@ const CandidateAttendance = (props, inputRef) => {
                   id="already-uploaded-container"
                   className="photos-container rounded-[2rem] flex items-center justify-center gap-2"
                 >
-                  {/* <!--QR CAPTURED IMAGE HERE --> */}
+                  {/* <!--FORM FILLING UPLOADED IMAGE --> */}
+                  <div className="profile-holder w-[180px] aspect-[3/4] rounded-xl overflow-hidden">
+                    <img
+                      id="student-image"
+                      src={getImage(
+                        candidateInfo?.sl_image,
+                        candidateInfo.candidateImageRelativePath
+                      )}
+                      onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
+                      className="w-full h-full"
+                    />
+                  </div>
+
+                  {/* <!--QR CAPTURED IMAGE --> */}
                   {isQrScanAllow?.length > 0 && isQrScanAllow[0]?.config_value === 'YES' && (
-                    <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
+                    <div className="profile-holder w-[180px] aspect-[3/4] rounded-xl overflow-hidden">
                       <img
                         id="student-qr-image"
                         src={getImage(
@@ -155,20 +168,7 @@ const CandidateAttendance = (props, inputRef) => {
                     </div>
                   )}
 
-                  {/* <!--ALREADY UPLOADED IMAGE HERE --> */}
-                  <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
-                    <img
-                      id="student-image"
-                      src={getImage(
-                        candidateInfo?.sl_image,
-                        candidateInfo.candidateImageRelativePath
-                      )}
-                      onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
-                      className="w-full h-full"
-                    />
-                  </div>
-
-                  {/* <!-- ALREADY UPLOADED SIGN HERE --> */}
+                  {/* <!-- ALREADY UPLOADED SIGN --> */}
                   <div className="sign-holder w-[17rem] h-[6rem] border rounded-xl overflow-hidden">
                     <img
                       id="student-sign"
