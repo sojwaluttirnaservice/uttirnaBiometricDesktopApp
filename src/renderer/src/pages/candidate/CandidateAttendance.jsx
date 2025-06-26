@@ -12,6 +12,7 @@ import dataURLToBlob from '../../utility/dataUrlToBlob'
 import NoImageAvailabePlaceholderImage from '../../assets/static-images/no-image-placeholder.svg.png'
 import WebCamera from '../../components/candidate/video/WebCamera'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
+import { replaceColonsToUnderscore } from '../../utility/help'
 
 const CandidateAttendance = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -94,14 +95,6 @@ const CandidateAttendance = (props, inputRef) => {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [candidateInfo.snapshotCaptured])
-
-  function replaceColonsToUnderscore(item) {
-    /**
-     * eg. item = APMC ATPADI/users/APMC ATPADI_sign_600067_2025-02-17 21:58:31.jpeg
-     * */
-    if (!item) return false
-    return item.split('/').pop().replaceAll(':', '_')
-  }
 
   function getImage(img, path) {
     if (!img) return null
