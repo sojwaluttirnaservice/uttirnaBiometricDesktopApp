@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import UttirnaImageLogo from '../../assets/static-images/uttirna-logo-nobg.png'
 import { showErrorToast, showSuccessToast, showWarningToast } from '../../ui/Toasts'
 
@@ -7,8 +7,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
 import { setCandidateInfo, setWebcamImage } from '../../redux/slices/candidateSlice'
 import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
-
-import DangerModal from '../modals/confirmationModals/DangerModal'
 
 import axios from 'axios'
 import { toggleSidebar } from '../../redux/slices/connectionDataSlice'
@@ -19,32 +17,11 @@ const Navbar = (props, inputRef) => {
   const dispatch = useDispatch()
   const location = useLocation()
   const currentPath = location.pathname
-  console.log({ location })
   const connectionData = useSelector((state) => state.connectionData)
   const [batches, setBatches] = useState([])
 
   // SELECT BATCH AND LAB
   const [batch, setBatch] = useState('')
-  const [lab, setLab] = useState('')
-
-  // WHEN THE COMPONENT RELOADED, GET THE BATCH AND LAB FROM LOCAL STORAGE
-  useEffect(() => {
-    const storedBatch = localStorage.getItem('batch')
-    if (storedBatch) {
-      setBatch(storedBatch)
-    }
-
-    const storedLab = localStorage.getItem('lab')
-    if (storedLab) {
-      setLab(storedLab)
-    }
-
-    // Remove the batch and lab from local storage when the component unmounts
-    return () => {
-      localStorage.removeItem('batch')
-      localStorage.removeItem('lab')
-    }
-  }, [])
 
   // Handles the change in the selected batch
 
@@ -71,8 +48,6 @@ const Navbar = (props, inputRef) => {
     }
 
     const handleBatchChange = () => {
-      if (lab == '') setBatch('')
-      localStorage.setItem('batch', batch)
       handleFetchBatches()
     }
     handleBatchChange()
@@ -97,7 +72,7 @@ const Navbar = (props, inputRef) => {
       const { data: resData } = await axios.post(endpoint, {
         batch,
         id: inputRef.current.value,
-        labName: lab
+        labName: ''
       })
 
       let { success, data, message } = resData

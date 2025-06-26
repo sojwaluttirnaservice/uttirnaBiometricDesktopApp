@@ -1,20 +1,12 @@
-import React, { useEffect, useRef } from 'react'
-import { BrowserRouter, Route, Routes, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 
-import CandidateAttendance from './pages/candidate/CandidateAttendance'
+import { useSelector } from 'react-redux'
+import CheckConnectionModal from './components/modals/CheckConnectionModal'
 import Navbar from './components/navbar/Navbar'
 import './index.css'
-import CheckConnectionModal from './components/modals/CheckConnectionModal'
-import { useSelector } from 'react-redux'
+import CandidateAttendance from './pages/candidate/CandidateAttendance'
 import StaffAttendance from './pages/candidate/StaffAttendance'
-
-const Layout = () => {
-  return (
-    <div>
-      <Outlet /> {/* This will render the nested routes */}
-    </div>
-  )
-}
 
 const App = () => {
   let inputRef = useRef(null)
@@ -45,13 +37,6 @@ const App = () => {
     }
   }, [])
 
-  // Try to remove the batch and lab
-  // BEFORE LOADING THE APP, CLEANING UP THE LAB AND BATCH
-  useEffect(() => {
-    if (localStorage.getItem('lab')) localStorage.removeItem('lab')
-    if (localStorage.getItem('batch')) localStorage.removeItem('batch')
-  }, [])
-
   return (
     <Routes>
       <Route
@@ -75,21 +60,3 @@ const App = () => {
 // Example pages
 
 export default App
-
-// {
-//   connectionData.status != 'Connected' ? (
-//     <>
-//       <CheckConnectionModal />
-//     </>
-//   ) : (
-//     <>
-//       <Navbar ref={inputRef} /> {/* Navbar is now part of the Router */}
-//       {<CandidateAttendance ref={inputRef} />}
-//       {/* <Routes>
-//     <Route path="/" element={<Layout />}>
-//       <Route path='' element={<CandidateAttendance ref={inputRef} />} />
-//     </Route>
-//   </Routes> */}
-//     </>
-//   )
-// }

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { resetCandidateInfo } from '../../../redux/slices/candidateSlice'
 import { resetBatchAttendance } from '../../../redux/slices/batchAttendanceSlice'
+import { resetCandidateInfo } from '../../../redux/slices/candidateSlice'
 import { resetTotalAttendance } from '../../../redux/slices/totalAttendanceSlice'
 
 const CandidateInfo = () => {

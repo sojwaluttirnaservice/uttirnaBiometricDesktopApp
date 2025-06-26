@@ -118,7 +118,7 @@ const CandidateAttendance = (props, inputRef) => {
         </>
       ) : (
         <>
-          <div className="container mx-auto">
+          <div className="mx-5">
             {/* CANDIDATE INFO AND ATTENDANCE HOLDER */}
             <div className="mt-4 grid grid-cols-10 gap-4">
               {/* Left part is Candidate info */}
@@ -248,33 +248,6 @@ const CandidateAttendance = (props, inputRef) => {
                 </div>
               </div>
             </div>
-
-            {/* Part for marking attendance or not */}
-
-            {/* {candidateInfo.sl_present_status != 1 && (
-              <div className="status-buttons ">
-                <div className="w-full flex justify-center gap-6 mt-6">
-                  <button
-                    type="button"
-                    id="mark-present-btn"
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    onClick={handleMarkCandidateAttendance}
-                  >
-                    Mark Present
-                  </button>
-
-                  <button
-                    type="button"
-                    id="reject-btn"
-                    className="hidden items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Reject
-                  </button>
-
-                 
-                </div>
-              </div>
-            )} */}
           </div>
         </>
       )}
