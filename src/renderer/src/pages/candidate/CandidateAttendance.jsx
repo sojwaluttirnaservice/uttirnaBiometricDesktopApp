@@ -13,6 +13,7 @@ import NoImageAvailabePlaceholderImage from '../../assets/static-images/no-image
 import WebCamera from '../../components/candidate/video/WebCamera'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 import { replaceColonsToUnderscore } from '../../utility/help'
+import { ALLOW_QR_SCAN } from '../../utility/constants'
 
 const CandidateAttendance = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -24,7 +25,7 @@ const CandidateAttendance = (props, inputRef) => {
   const isQrScanAllow = useMemo(() => {
     if (connectionData?.projectConfig?.length > 0) {
       return connectionData.projectConfig.filter((_configKey) => {
-        return _configKey.config_key == 'is_allow_qr_scan'
+        return _configKey.config_key == ALLOW_QR_SCAN
       })
     }
   })
