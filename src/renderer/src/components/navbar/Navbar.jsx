@@ -12,6 +12,9 @@ import axios from 'axios'
 import { toggleSidebar } from '../../redux/slices/connectionDataSlice'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 import Sidebar from '../Sidebar'
+import LabDropdown from './LabDropdown'
+import { MESSAGE_TYPES } from '../../utility/constants'
+import Modal from '../modals/BasicModal'
 
 const Navbar = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -19,25 +22,35 @@ const Navbar = (props, inputRef) => {
   const currentPath = location.pathname
   const connectionData = useSelector((state) => state.connectionData)
   const [batches, setBatches] = useState([])
+  const [labs, setLabs] = useState([])
+
+  const [showModal, setShowModal] = useState(false)
+  const [popupMessage, setPopupMessage] = useState('')
 
   // SELECT BATCH AND LAB
-  const [batch, setBatch] = useState('')
+  const [selectedBatch, setSelectedBatch] = useState([])
+  const [selectedLabs, setSelectedLabs] = useState([])
 
-  // Handles the change in the selected batch
+  function handleSetSelectedLab(lab) {
+    const isLabSelected = selectedLabs.some((_lab) => _lab.lab_no == lab.lab_no)
+    setSelectedLabs((prev) =>
+      isLabSelected ? prev.filter((_lab) => _lab.lab_no !== lab.lab_no) : [...prev, lab]
+    )
+  }
 
   useEffect(() => {
-    // fetcht the batches corresponding the lab
-    const handleFetchBatches = async () => {
+    const fetchCandidateAttendanceHomePageData = async () => {
       try {
         // Fetching the candidate data
-        let url = `${connectionData.backendUrl}/api/attendence/v1/batch-list`
+        let url = `${connectionData.backendUrl}/api/attendence/v1/candidate-attendance-home-page-data`
         const { data: resData } = await axios.get(url)
 
         const { success, message, data } = resData
 
         if (success) {
-          let { _batchList } = data
+          let { _batchList, _labList } = data
           setBatches(_batchList)
+          setLabs(_labList)
         } else {
           showErrorToast(message || 'Something went wrong')
         }
@@ -47,10 +60,7 @@ const Navbar = (props, inputRef) => {
       }
     }
 
-    const handleBatchChange = () => {
-      handleFetchBatches()
-    }
-    handleBatchChange()
+    fetchCandidateAttendanceHomePageData()
   }, [])
 
   // Fetches teh data from remote server
@@ -63,23 +73,30 @@ const Navbar = (props, inputRef) => {
         return
       }
 
-      if (!batch) {
+      if (!selectedBatch) {
         showWarningToast('Please select a batch')
         return
       }
+
+      if (selectedLabs.length === 0) {
+        showWarningToast('Please select atleast one lab')
+        return
+      }
+
       // Fetching the candidate data
       let endpoint = `${connectionData.backendUrl}/api/attendence/v1/student-details`
       const { data: resData } = await axios.post(endpoint, {
-        batch,
+        batch: selectedBatch,
+        selectedLabs,
         id: inputRef.current.value,
         labName: ''
       })
 
-      let { success, data, message } = resData
-      console.log(data, '==data==')
+      let { success, data, message, messageType = MESSAGE_TYPES.TOAST } = resData
+      console.log(messageType, '==')
+      console.log(message, '===message')
 
       if (success) {
-        showSuccessToast('Candidate data fetched.')
         const {
           student,
           studentAttendenceCount,
@@ -99,11 +116,16 @@ const Navbar = (props, inputRef) => {
             justMarkedPresent: false
           })
         )
-        return
       }
 
-      if (!success) {
-        showWarningToast(message || 'Failed to fetch data')
+      switch (messageType) {
+        case MESSAGE_TYPES.TOAST:
+          showSuccessToast(message || 'Success')
+          break
+        case MESSAGE_TYPES.POPUP:
+          setShowModal(true)
+          setPopupMessage(message || 'Success')
+          break
       }
     } catch (err) {
       const er = err?.response?.data
@@ -115,10 +137,22 @@ const Navbar = (props, inputRef) => {
     <>
       <Sidebar />
 
+      <Modal
+        isOpen={showModal}
+        setIsOpen={setShowModal}
+        title="Alert"
+        className=""
+        onClose={() => {
+          setShowModal(false)
+          setPopupMessage('')
+        }}
+      >
+        <span className="font-medium text-2xl">{popupMessage}</span>
+      </Modal>
+
       <div className="bg-white sticky top-0 border-b border-gray-400">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between font-semibold">
-            {/* LEFT */}
             <ul className="flex items-center gap-4 ">
               <li key="logo-image" onClick={() => dispatch(toggleSidebar(true))}>
                 <img src={UttirnaImageLogo} alt="" className="w-10" />
@@ -127,18 +161,18 @@ const Navbar = (props, inputRef) => {
               {currentPath === '/candidate-attendance' && <p>Candidate Attendance</p>}
               {currentPath === '/staff-attendance' && <p>Staff Attendance</p>}
             </ul>
-            {/* MIDDLE */}
+            {/* RIGHT */}
             {currentPath === '/candidate-attendance' && (
               <div>
-                <div className="flex items-center gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   {/* Select batch options */}
                   <div>
                     <select
                       className="px-4 py-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block text-md border border-gray-300 rounded-xl"
                       name="batch_id"
                       id="batch-id"
-                      onChange={(e) => setBatch(e.target.value)}
-                      value={batch}
+                      onChange={(e) => setSelectedBatch(e.target.value)}
+                      value={selectedBatch}
                     >
                       <option
                         value=""
@@ -160,45 +194,47 @@ const Navbar = (props, inputRef) => {
                     </select>
                   </div>
 
-                  <div className="flex justify-between items-center gap-4">
-                    <div className="input-holder">
-                      <input
-                        ref={inputRef}
-                        type="number"
-                        name="search"
-                        id="student-id"
-                        placeholder="Search candidate..."
-                        autoComplete="off"
-                        className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48  text-md border border-gray-300 rounded-xl"
-                        // onChange={(e) => setCandidateId(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleFetchCandidateData(e)
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="button-holder">
-                      <button
-                        type="button"
-                        id="search-btn"
-                        className="relative overflow-hidden inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        onClick={handleFetchCandidateData}
-                      >
-                        <span>Search</span>
-                        <div id="btn-loader-container">
-                          <div className="btn-loader-inside">
-                            <div id="btn-loader"></div>
-                          </div>
+                  <LabDropdown
+                    labs={labs}
+                    handleSetSelectedLab={handleSetSelectedLab}
+                    selectedLabs={selectedLabs}
+                  />
+
+                  <div className="input-holder">
+                    <input
+                      ref={inputRef}
+                      type="number"
+                      name="search"
+                      id="student-id"
+                      placeholder="Search candidate..."
+                      autoComplete="off"
+                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48  text-md border border-gray-300 rounded-xl"
+                      // onChange={(e) => setCandidateId(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleFetchCandidateData(e)
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="button-holder">
+                    <button
+                      type="button"
+                      id="search-btn"
+                      className="relative overflow-hidden inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      onClick={handleFetchCandidateData}
+                    >
+                      <span>Search</span>
+                      <div id="btn-loader-container">
+                        <div className="btn-loader-inside">
+                          <div id="btn-loader"></div>
                         </div>
-                      </button>
-                    </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
               </div>
             )}
-            {/* RIGHT */}
-            <div>Connected To: {connectionData.backendUrl}</div>
           </div>
         </div>
       </div>

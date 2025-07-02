@@ -7,6 +7,7 @@ import Navbar from './components/navbar/Navbar'
 import './index.css'
 import CandidateAttendance from './pages/candidate/CandidateAttendance'
 import StaffAttendance from './pages/candidate/StaffAttendance'
+import StatusBar from './components/navbar/StatusBar'
 
 const App = () => {
   let inputRef = useRef(null)
@@ -45,6 +46,7 @@ const App = () => {
             {/* This is root layout */}
             <Navbar ref={inputRef} />
             <Outlet />
+            <StatusBar />
           </>
         }
       >

@@ -25,9 +25,8 @@ const CheckConnectionModal = () => {
   const LoginValidationSchema = z.object({
     protocol: z.string({ required_error: 'Protocol must be a string' }),
     ipAddress: z.string({ required_error: 'Invalid IP address' }),
-    port: z
-      .number({ required_error: 'Port is required' })
-      .min(1, { message: 'Port must be a positive number' }),
+    port: z.string({ required_error: 'Port is required' }),
+
     role: z.enum([ROLES.BIOMETRIC_CANDIDATE_ATTENDANCE, ROLES.BIOMETRIC_STAFF_ATTENDANCE], {
       errorMap: () => ({ message: 'Invalid role selected' })
     }),

@@ -4,3 +4,8 @@ export const ROLES = {
 }
 
 export const ALLOW_QR_SCAN = 'is_allow_qr_scan'
+
+export const MESSAGE_TYPES = {
+  POPUP: "POPUP",
+  TOAST: "TOAST",
+};
