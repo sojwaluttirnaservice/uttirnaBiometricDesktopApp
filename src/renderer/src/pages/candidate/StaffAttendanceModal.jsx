@@ -35,11 +35,11 @@ function StaffAttendanceModal({
         let { _batchList } = data
         setBatches(_batchList)
       } else {
-        showErrorToast(message || 'Something went wrong')
+        showErrorToast(message || 'Something went wrong', 'Failed to fetch batch')
       }
     } catch (err) {
       console.log(err)
-      showErrorToast('Failed to fetch the batches')
+      showErrorToast('Failed to fetch the batches', 'Failed to fetch batch')
     }
   }
 
@@ -50,18 +50,20 @@ function StaffAttendanceModal({
   }, [batches])
 
   const [webcamImage, setWebcamImage] = useState(initialWebcamImageState)
+  const [isMarkingStaffAttendance, setIsMarkingStaffAttendance] = useState(false)
 
   const markStaffAttendance = async (staffId) => {
     if (!staffId) {
-      showErrorToast('Invalid staff id')
+      showErrorToast('Invalid staff id', 'invalid-staff-id')
       return
     }
 
     if (!webcamImage.snapshotCaptured) {
-      showErrorToast(`Please Capture a Photo.`)
+      showErrorToast(`Please Capture a Photo.`, 'invalid-photo')
       return
     }
 
+    setIsMarkingStaffAttendance(true)
     try {
       const url = `${connectionData.backendUrl}/api/staff/v1/mark-attendance`
 
@@ -82,14 +84,22 @@ function StaffAttendanceModal({
       const { success, message } = resData
 
       if (success) {
-        showSuccessToast(message || 'Attendance marked successfully')
+        showSuccessToast(
+          message || 'Attendance marked successfully',
+          'attendance-marked-successfully'
+        )
         setWebcamImage(initialWebcamImageState)
         setIsCapturePhotoModalOpen(false)
         handleGetStaffAttendanceBatchWise()
       }
     } catch (err) {
       console.error(err)
-      showErrorToast(err?.response?.data?.message || 'Something went wrong')
+      showErrorToast(
+        err?.response?.data?.message || 'Something went wrong',
+        'attendance-marking-error'
+      )
+    } finally {
+      setIsMarkingStaffAttendance(false)
     }
   }
 
@@ -100,7 +110,7 @@ function StaffAttendanceModal({
       const batchId = batchDropdownRef.current.value
       if (!batchId) {
         batchDropdownRef.current.focus()
-        showErrorToast('Please select batch')
+        showErrorToast('Please select batch', 'invalid-batch')
         setStaffListWithAttendance([])
         return
       }
@@ -123,10 +133,13 @@ function StaffAttendanceModal({
 
       setStaffListWithAttendance(updatedStaffList)
 
-      showSuccessToast(message || 'Successfully')
+      showSuccessToast(message || 'Successfully', 'staff-attendance-fetched')
     } catch (err) {
       console.error(err)
-      showErrorToast(err?.response?.data?.message || 'Something went wrong')
+      showErrorToast(
+        err?.response?.data?.message || 'Something went wrong',
+        'staff-attendance-fetch-error'
+      )
     } finally {
       setWebcamImage(initialWebcamImageState)
     }
@@ -248,8 +261,9 @@ function StaffAttendanceModal({
           setIsCapturePhotoModalOpen(false)
         }}
       >
-        <div className="min-w-[30vw] p-3">
+        <div className="min-w-[35vw] p-3">
           <Video2
+            isMarkingStaffAttendance={isMarkingStaffAttendance}
             markStaffAttendance={markStaffAttendance}
             setWebcamImage={setWebcamImage}
             webcamImage={webcamImage}

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { forwardRef, useEffect, useMemo, useRef } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import AttendanceInfo from '../../components/candidate/attendancdInfo/attendanceInfo'
 import CandidateInfo from '../../components/candidate/candidateInfo/CandidateInfo'
@@ -14,6 +14,10 @@ import WebCamera from '../../components/candidate/video/WebCamera'
 import { setLabAttendance } from '../../redux/slices/labAttendanceSlice'
 import { replaceColonsToUnderscore } from '../../utility/help'
 import { ALLOW_QR_SCAN } from '../../utility/constants'
+import { AiOutlineLoading3Quarters } from 'react-icons/ai'
+import { IoCameraOutline } from 'react-icons/io5'
+import { RiResetLeftFill } from 'react-icons/ri'
+import { IoIosCheckmarkCircleOutline } from 'react-icons/io'
 
 const CandidateAttendance = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -21,6 +25,7 @@ const CandidateAttendance = (props, inputRef) => {
 
   const candidateInfo = useSelector((state) => state.candidateInfo)
   const connectionData = useSelector((state) => state.connectionData)
+  const [isMarkingAttendance, setIsMarkingAttendance] = useState(false)
 
   const isQrScanAllow = useMemo(() => {
     if (connectionData?.projectConfig?.length > 0) {
@@ -34,10 +39,11 @@ const CandidateAttendance = (props, inputRef) => {
     e?.preventDefault?.()
 
     if (!candidateInfo.id || !candidateInfo.snapshotCaptured) {
-      showErrorToast(`Please Capture a Photo.`)
+      showErrorToast(`Please Capture a Photo.`, 'Invalid photo')
       return
     }
 
+    setIsMarkingAttendance(true)
     try {
       const url = `${connectionData.backendUrl}/api/attendence/v1/mark-present`
 
@@ -60,7 +66,7 @@ const CandidateAttendance = (props, inputRef) => {
 
       if (success) {
         const { attendenceCount, batchCount, labCount } = data
-        showSuccessToast(message || 'Attendance marked successfully')
+        showSuccessToast(message || 'Attendance marked successfully', 'Attendance Marked')
         dispatch(
           setWebcamImage({
             snapshotCaptured: false,
@@ -76,7 +82,9 @@ const CandidateAttendance = (props, inputRef) => {
       }
     } catch (err) {
       console.error(`Error while marking the attendance: ${err}`)
-      showErrorToast(err?.message || 'Something went wrong')
+      showErrorToast(err?.message || 'Something went wrong', 'Error while marking attendance')
+    } finally {
+      setIsMarkingAttendance(false)
     }
   }
 
@@ -129,7 +137,7 @@ const CandidateAttendance = (props, inputRef) => {
             {/* CANDIDATE PHOTO CAPTURE PART */}
             <div className="mt-4 grid grid-cols-2 gap-4">
               {/* Left part for already uploaded candidate photos */}
-              <div className="shadow-md rounded-[2rem] py-4  px-12">
+              <div className="shadow-md rounded-xl py-4  px-12">
                 <div
                   id="already-uploaded-container"
                   className="photos-container rounded-[2rem] flex items-center justify-center gap-2"
@@ -180,7 +188,7 @@ const CandidateAttendance = (props, inputRef) => {
               </div>
 
               {/* Right part for photo capturing */}
-              <div className="shadow-md rounded-[2rem] py-4 px-12 grid gap-3 grid-cols-2">
+              <div className="shadow-md rounded-xl py-4 px-12 grid gap-3 grid-cols-2">
                 <div className="justify-self-center">
                   <WebCamera
                     cameraControlsRef={cameraControlsRef}
@@ -204,38 +212,50 @@ const CandidateAttendance = (props, inputRef) => {
                 <div className="flex flex-col gap-2 justify-self-center">
                   {/*Buttons wont be visible if and only attendance is not marked */}
                   {candidateInfo.sl_present_status != 1 && (
-                    <>
+                    <div className="grid grid-cols-1 gap-3 w-full">
                       <button
                         type="button"
-                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="px-8 py-4 flex gap-2 items-center border justify-center border-transparent text-lg h-full rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         id="take-snap-btn"
                         onClick={() => cameraControlsRef.current?.handleTakeSnap()}
                       >
-                        Take Snap!
+                        <IoCameraOutline />
+                        <span>Take Snap</span>
                       </button>
 
                       <button
                         type="button"
                         id="reset-btn"
-                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="px-8 py-4 flex gap-2 items-center justify-center border border-transparent text-lg h-full font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         onClick={() => cameraControlsRef.current?.handleResetSnap()}
                       >
-                        Reset
+                        <RiResetLeftFill />
+                        <span>Reset</span>
                       </button>
 
                       <button
                         type="button"
                         id="mark-present-btn"
-                        className="px-8 py-4 border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        className={`px-8 py-4 ${isMarkingAttendance ? 'disabled:opacity-50' : ''}  relative h-full flex gap-2 items-center justify-center border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
+                        disabled={isMarkingAttendance}
                         onClick={handleMarkCandidateAttendance}
                       >
-                        Mark Present
+                        <span
+                          className={`flex gap-2 justify-center items-center transition-opacity duration-150 ${!isMarkingAttendance ? 'opacity-100' : 'opacity-0'}`}
+                        >
+                          <IoIosCheckmarkCircleOutline />
+                          <span>Mark Present</span>
+                        </span>
+
+                        <AiOutlineLoading3Quarters
+                          className={`animate-spin absolute left-[45%] ${isMarkingAttendance ? 'opacity-100' : 'opacity-0'}`}
+                        />
                       </button>
-                    </>
+                    </div>
                   )}
 
                   {candidateInfo.sl_present_status == 1 && (
-                    <div className="px-8 py-4 text-center border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <div className="px-8 py-4 text-center border border-transparent text-lg font-medium shadow-md rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                       This candidate already marked present
                     </div>
                   )}

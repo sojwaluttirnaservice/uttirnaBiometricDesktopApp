@@ -8,17 +8,15 @@ import { ToastContainer, toast } from 'react-toastify'
 
 import store from './redux/store/store'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  // <React.StrictMode>
   <>
-    <BrowserRouter>
+    <HashRouter>
       <Provider store={store}>
         <App />
-        <ToastContainer />
+        <ToastContainer limit={3} />
       </Provider>
-    </BrowserRouter>
+    </HashRouter>
   </>
-  // </React.StrictMode>
 )

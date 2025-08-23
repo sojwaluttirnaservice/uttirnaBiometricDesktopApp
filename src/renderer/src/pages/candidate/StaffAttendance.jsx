@@ -13,6 +13,7 @@ import { PiOfficeChair } from 'react-icons/pi'
 import { RiContactsLine } from 'react-icons/ri'
 import { HiDesktopComputer } from 'react-icons/hi'
 import StaffAttendanceModal from './StaffAttendanceModal'
+import { AiOutlineLoading3Quarters } from 'react-icons/ai'
 
 const StaffAttendance = () => {
   const labNameRef = useRef(null)
@@ -22,6 +23,8 @@ const StaffAttendance = () => {
 
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false)
   const [isShowattendanceModal, setIsShowattendanceModal] = useState(false)
+  const [isStaffRegistration, setIsStaffRegistration] = useState(false)
+
   const [labsList, setLabsList] = useState([])
   const [staffList, setStaffList] = useState([])
   const [staffDesignationList, setStaffDesignationList] = useState([])
@@ -36,7 +39,7 @@ const StaffAttendance = () => {
       setLabsList(data?.data?._labList || [])
     } catch (err) {
       console.error(`Error while getting labs list: ${err}`)
-      showErrorToast(err?.message || 'Something went wrong')
+      showErrorToast(err?.message || 'Something went wrong', 'Error Fetching Labs List')
     }
   }
 
@@ -47,7 +50,7 @@ const StaffAttendance = () => {
       setStaffList(resData?.data || [])
     } catch (err) {
       console.error(`Error while getting staff list: ${err}`)
-      showErrorToast(err?.message || 'Something went wrong')
+      showErrorToast(err?.message || 'Something went wrong', 'Error Fetching Staff List')
     }
   }
 
@@ -59,7 +62,7 @@ const StaffAttendance = () => {
       setStaffDesignationList(resData?.data || [])
     } catch (err) {
       console.error(`Error while getting staff list: ${err}`)
-      showErrorToast(err?.message || 'Something went wrong')
+      showErrorToast(err?.message || 'Something went wrong', 'Error Fetching Staff Designation List')
     }
   }
 
@@ -78,9 +81,10 @@ const StaffAttendance = () => {
     e?.preventDefault?.()
 
     if (!candidateInfo.snapshotCaptured) {
-      showErrorToast(`Please Capture a Photo.`)
+      showErrorToast(`Please Capture a Photo.`,'Error Capturing Photo')
       return
     }
+    setIsStaffRegistration(true)
 
     try {
       const url = `${connectionData.backendUrl}/api/staff/v1/save-details `
@@ -108,7 +112,7 @@ const StaffAttendance = () => {
       const { success, message } = resData
 
       if (success) {
-        showSuccessToast(message || 'Attendance marked successfully')
+        showSuccessToast(message || 'Attendance marked successfully', 'Success mark attendance staff')
         dispatch(
           setWebcamImage({
             snapshotCaptured: false,
@@ -121,7 +125,9 @@ const StaffAttendance = () => {
       handleStaffRegistrationModalClose()
     } catch (err) {
       console.error(err.response.data.message, '-err')
-      showErrorToast(err?.response?.data?.message || 'Something went wrong')
+      showErrorToast(err?.response?.data?.message || 'Something went wrong' ,'Error Submitting Staff Details')
+    } finally {
+      setIsStaffRegistration(false)
     }
   }
 
@@ -266,9 +272,21 @@ const StaffAttendance = () => {
               <button
                 type="submit"
                 onClick={handleSubmitStaffDetails}
-                className="bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-all"
+                disabled={isStaffRegistration}
+                className={`bg-blue-500 text-white px-6 py-2 rounded-xl hover:bg-blue-600 transition-all relative ${isStaffRegistration ? 'disabled:opacity-50' : ''}`}
               >
-                Submit
+                <span
+                  className={`absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] ${isStaffRegistration ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  Submit
+                </span>
+
+                <span
+                  className={`flex items-center gap-3 justify-center ${!isStaffRegistration ? 'opacity-0' : 'opacity-100'}`}
+                >
+                  <AiOutlineLoading3Quarters className='animate-spin' />
+                  <span>Submitting...</span>
+                </span>
               </button>
 
               <button
@@ -324,7 +342,7 @@ function StaffCards({ staffList, getStaffList }) {
     } catch (err) {
       console.error(err)
       const error = err?.response?.data || {}
-      showErrorToast(error?.errMsg || 'Something went wrong')
+      showErrorToast(error?.errMsg || 'Something went wrong', 'Error Deleting Staff')
     }
   }
 

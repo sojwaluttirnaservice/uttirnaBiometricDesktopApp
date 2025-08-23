@@ -15,7 +15,7 @@ const ErrorModal = ({
     //   setIsOpen(false) // Close modal on successful retry
     } catch (error) {
       console.error('Retry failed', error)
-      showErrorToast(error)
+      showErrorToast(error, 'Connection Retry failed')
     }
   }
 

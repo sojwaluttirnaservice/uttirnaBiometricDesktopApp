@@ -8,6 +8,7 @@ import { z } from 'zod/v4'
 import { formatZodErrors } from '../../utility/help'
 import InputError from '../../ui/InputError'
 import { ROLES } from '../../utility/constants'
+import { AiOutlineLoading3Quarters } from 'react-icons/ai'
 
 const initialErrorObject = {
   protocol: '',
@@ -123,7 +124,7 @@ const CheckConnectionModal = () => {
       console.log(data, '=data=check data')
 
       if (success) {
-        showSuccessToast(message || 'Successfully Connected')
+        showSuccessToast(message || 'Successfully Connected', 'Connection Success')
         dispatch(
           setConnectionData({
             ...backendConnectionData,
@@ -143,7 +144,7 @@ const CheckConnectionModal = () => {
           navigate('/staff-attendance')
         }
       } else {
-        showWarningToast('Connection failed')
+        showWarningToast('Connection failed', 'Connection Failed')
       }
     } catch (err) {
       // Handle request cancellation or errors
@@ -154,18 +155,18 @@ const CheckConnectionModal = () => {
           // The server responded with a status code outside the 2xx range
           console.error('Error response:', err.response)
           // You can show a user-friendly message here
-          showWarningToast('There was a problem with the server. Please try again later.')
+          showWarningToast('There was a problem with the server. Please try again later.', 'Connection error')
         } else if (err.request) {
           // The request was made but no response was received
           console.error('No response:', err.request)
           // You can show a user-friendly message here
-          showWarningToast('Could not connect to the server. Please check your network connection.')
+          showWarningToast('Could not connect to the server. Please check your network connection.', 'Connection error')
         } else {
           // Something else happened in setting up the request
           // console.error('Error setting up request:', err.message)
           // showWarningToast('An error occurred. Please try again.')
           console.error('Connection failed:', err)
-          showWarningToast('Connection failed. Please try again later.')
+          showWarningToast('Connection failed. Please try again later.', 'Connection Failed')
         }
       }
     } finally {
@@ -315,13 +316,27 @@ const CheckConnectionModal = () => {
               {errors?.password && <InputError>{errors.password}</InputError>}
             </div>
           </div>
-          <div className="flex justify-end mt-4 gap-2">
+          <div className="flex justify-center mt-4 gap-2 w-full">
             <button
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 ${isConnecting ? 'disabled:opacity-50' : ''}`}
               onClick={handleCheckConnection}
               disabled={isConnecting}
             >
-              {isConnecting ? 'Connecting' : 'Connect'}
+              {/* {isConnecting ? 'Connecting' : 'Connect'} */}
+
+              <span className={`flex items-center gap-2 relative`}>
+                <AiOutlineLoading3Quarters
+                  className={`${isConnecting ? 'opacity-100 animate-spin' : 'opacity-0'}`}
+                />
+                <span className={`${isConnecting ? 'opacity-100' : 'opacity-0'}`}>
+                  Connecting...
+                </span>
+                <span
+                  className={`absolute left-[50%] translate-x-[-50%] ${!isConnecting ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  Connect
+                </span>
+              </span>
             </button>
 
             <button

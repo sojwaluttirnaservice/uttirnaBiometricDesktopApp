@@ -12,9 +12,10 @@ export const SuccessToast = ({ message }) => {
 }
 
 // Function to trigger the toast
-export const showSuccessToast = (message) => {
+export const showSuccessToast = (message, source = 'default') => {
   toast.success(<SuccessToast message={message} />, {
-    position: 'top-right',
+    toastId: `toast_${source}`,
+    position: 'bottom-center',
     autoClose: 1500,
     hideProgressBar: true,
     closeOnClick: true,
@@ -33,9 +34,10 @@ export const WarningToast = ({ message }) => {
   )
 }
 
-export const showWarningToast = (message) => {
+export const showWarningToast = (message, source = 'default') => {
   toast.warn(<WarningToast message={message} />, {
-    position: 'top-right',
+    toastId: `toast_${source}`,
+    position: 'bottom-center',
     autoClose: 1500,
     hideProgressBar: true,
     closeOnClick: true,
@@ -53,9 +55,10 @@ export const ErrorToast = ({ message }) => {
   )
 }
 
-export const showErrorToast = (message) => {
+export const showErrorToast = (message, source = 'default') => {
   toast.error(<ErrorToast message={message} />, {
-    position: 'top-right',
+    toastId: `toast_${source}`,
+    position: 'bottom-center',
     autoClose: 2500,
     hideProgressBar: true,
     closeOnClick: true,

@@ -153,13 +153,14 @@ const WebCamera = ({
       />
 
       <div className="w-full">
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center justify-between rounded-md">
           <video
             ref={videoRef}
             autoPlay
             playsInline
             muted
             style={{ display: 'none' }} // Hide the video element
+            className="rounded-xl"
           />
 
           {/* Video should be only visible in either case(
@@ -170,6 +171,7 @@ const WebCamera = ({
           {isShowWebCam && (
             <>
               <canvas
+                className="rounded-xl"
                 ref={canvasRef}
                 style={{
                   border: '',
@@ -192,7 +194,7 @@ const WebCamera = ({
                   id="student-image"
                   src={`${connectionData.backendUrl}/${fetchedImageRelativePath}/${fetchedImageName}`}
                   onError={(e) => (e.target.src = NoImageAvailabePlaceholderImage)}
-                  className="w-full h-full"
+                  className="w-full h-full rounded-xl"
                 />
               </div>
             </>
@@ -203,7 +205,7 @@ const WebCamera = ({
            */}
           {isShowCapturedImage && (
             <>
-              <img src={capturedImagePath} alt="" />
+              <img src={capturedImagePath} alt="" className="rounded-xl" />
             </>
           )}
         </div>

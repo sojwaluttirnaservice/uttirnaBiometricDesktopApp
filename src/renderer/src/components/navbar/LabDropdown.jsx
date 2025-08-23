@@ -50,7 +50,7 @@ const LabDropdown = ({ labs, handleSetSelectedLab, selectedLabs }) => {
                 checked={selectedLabs.some((_lab) => _lab.lab_no === lab.lab_no)}
                 onChange={() => handleCheckboxChange(lab)}
               />
-              {lab.lab_name}
+              (Lab-{lab.lab_no}) {lab.lab_name}
             </label>
           ))}
         </div>

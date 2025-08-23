@@ -19,7 +19,7 @@ const CandidateInfo = () => {
 
   return (
     <>
-      <div className="h-full  flex flex-col gap-4">
+      <div className="h-full flex flex-col gap-4">
         <h3 className="text-center font-bold text-[#555]">Candidate Details</h3>
         <div className="candidate-info">
           <div className="grid grid-cols-3 col-span-3 gap-3 shadow-md p-6 rounded-[0.8rem]">

@@ -28,11 +28,11 @@ export const FullDayAttendanceModal = ({
         setLabwiseAttendanceCount(_labWiseCount)
       } else {
         setLabwiseAttendanceCount([])
-        showErrorToast(message)
+        showErrorToast(message, 'Error Fetching Lab Attendance Count', 'Error while getting   lab attendance count')
       }
     } catch (err) {
       console.log(err)
-      showErrorToast(err)
+      showErrorToast(err, 'Error Fetching Lab Attendance Count', 'Error while getting lab attendance count')
     }
   }
 

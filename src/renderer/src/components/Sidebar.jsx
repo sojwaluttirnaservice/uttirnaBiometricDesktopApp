@@ -1,9 +1,11 @@
-import React, { act, useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import DangerModal from './modals/confirmationModals/DangerModal'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { NavLink } from 'react-router-dom'
 import { resetConnectionData, toggleSidebar } from '../redux/slices/connectionDataSlice'
+import { showSuccessToast } from '../ui/Toasts'
 import { ROLES } from '../utility/constants'
+import DangerModal from './modals/confirmationModals/DangerModal'
+const { ipcRenderer } = window.require('electron')
 
 function Sidebar() {
   const dispatch = useDispatch()
@@ -11,6 +13,20 @@ function Sidebar() {
   const isSidebarOpen = useSelector((state) => state.connectionData.isSidebarOpen)
 
   const role = useSelector((state) => state.connectionData.role)
+
+  const sideBarRef = useRef(null)
+
+  // useEffect(() => {
+  //   function closeSidebar(e) {
+  //     if (sideBarRef.current && !sideBarRef.current.contains(e.target) && !isSidebarOpen) {
+  //       dispatch(toggleSidebar(false))
+  //     }
+  //   }
+
+  //   window.addEventListener('click', closeSidebar)
+
+  //   return () => window.removeEventListener('click', closeSidebar)
+  // }, [])
 
   return (
     <>
@@ -63,6 +79,17 @@ function Sidebar() {
             }}
           >
             Logout
+          </li>
+
+          <li
+            className="cursor-pointer hover:bg-gray-700 py-3 px-2"
+            onClick={(e) => {
+              console.log(1)
+              showSuccessToast('App is restarting...', 'restart-app')
+              ipcRenderer.send('restart-app')
+            }}
+          >
+            Restart App
           </li>
 
           <li

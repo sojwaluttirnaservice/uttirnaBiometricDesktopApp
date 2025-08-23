@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import NoImageAvailabePlaceholderImage from '../../../assets/static-images/no-image-placeholder.svg.png'
 import ErrorModal from '../../modals/confirmationModals/ErrorModal'
+import { IoIosCheckmarkCircleOutline } from 'react-icons/io'
+import { AiOutlineLoading3Quarters } from 'react-icons/ai'
 
 const Video2 = ({
   webcamImage,
   setWebcamImage,
   markStaffAttendance,
+  isMarkingStaffAttendance,
   staff_id,
   isCapturePhotoModalOpen
 }) => {
@@ -164,9 +167,9 @@ const Video2 = ({
           />
 
           {/* Video should be only visible in either case(
-        1. When attendance is not marked 
-        2. And if attendance is not marked & when we have not captured the image on local or not just captured
-        ) */}
+            1. When attendance is not marked 
+            2. And if attendance is not marked & when we have not captured the image on local or not just captured
+          ) */}
 
           {webcamImage.sl_present_status != 1 &&
             !webcamImage.snapshotCaptured &&
@@ -185,9 +188,9 @@ const Video2 = ({
           {/* CONDITION 1 */}
 
           {/* 
-        1. Candidate attendance statsu is fetched from the server
-        2. Candidate has already captured webcam image
-        3. Image is not capture just now i.e. on local just now*/}
+          1. Candidate attendance statsu is fetched from the server
+          2. Candidate has already captured webcam image
+          3. Image is not capture just now i.e. on local just now*/}
           {webcamImage.sl_present_status == 1 && !webcamImage.justMarkedPresent && (
             <>
               <div className="profile-holder w-[180px] aspect-[3/4]  overflow-hidden">
@@ -210,10 +213,10 @@ const Video2 = ({
             </>
           )}
 
-          <div>
+          <div className=" w-full flex justify-center">
             {/*Buttons wont be visible if and only attendance is not marked */}
             {webcamImage.sl_present_status != 1 && (
-              <>
+              <div className="grid grid-cols-1 w-[60%]">
                 <div className="flex flex-col gap-4 ">
                   <button
                     type="button"
@@ -226,11 +229,21 @@ const Video2 = ({
 
                   <button
                     type="button"
-                    className="px-8 py-4 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    id="take-snap-btn"
+                    id="mark-present-btn"
+                    className={`px-8 py-4 ${isMarkingStaffAttendance ? 'disabled:opacity-50' : ''} relative h-full flex gap-2 items-center justify-center border border-transparent text-lg font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
+                    disabled={isMarkingStaffAttendance}
                     onClick={markStaffAttendance.bind(null, staff_id)}
                   >
-                    Mark present
+                    <span
+                      className={`flex gap-2 absolute w-full left-[50%] translate-x-[-50%] justify-center items-center transition-opacity duration-150 ${!isMarkingStaffAttendance ? 'opacity-100' : 'opacity-0'}`}
+                    >
+                      <IoIosCheckmarkCircleOutline />
+                      <span className="">Mark Present</span>
+                    </span>
+
+                    <AiOutlineLoading3Quarters
+                      className={`animate-spin ${isMarkingStaffAttendance ? 'opacity-100' : 'opacity-0'}`}
+                    />
                   </button>
 
                   <button
@@ -242,7 +255,7 @@ const Video2 = ({
                     Reset
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

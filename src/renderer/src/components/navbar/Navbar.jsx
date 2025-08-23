@@ -5,7 +5,11 @@ import { showErrorToast, showSuccessToast, showWarningToast } from '../../ui/Toa
 
 import { useDispatch, useSelector } from 'react-redux'
 import { setBatchAttendance } from '../../redux/slices/batchAttendanceSlice'
-import { setCandidateInfo, setWebcamImage } from '../../redux/slices/candidateSlice'
+import {
+  resetCandidateInfo,
+  setCandidateInfo,
+  setWebcamImage
+} from '../../redux/slices/candidateSlice'
 import { setTotalAttendance } from '../../redux/slices/totalAttendanceSlice'
 
 import axios from 'axios'
@@ -15,6 +19,9 @@ import Sidebar from '../Sidebar'
 import LabDropdown from './LabDropdown'
 import { MESSAGE_TYPES } from '../../utility/constants'
 import Modal from '../modals/BasicModal'
+import { AiOutlineLoading3Quarters } from 'react-icons/ai'
+import { IoSearchOutline } from 'react-icons/io5'
+import { RiResetLeftLine } from 'react-icons/ri'
 
 const Navbar = (props, inputRef) => {
   const dispatch = useDispatch()
@@ -31,11 +38,16 @@ const Navbar = (props, inputRef) => {
   const [selectedBatch, setSelectedBatch] = useState([])
   const [selectedLabs, setSelectedLabs] = useState([])
 
+  const [isSearchingCandiate, setIsSearchingCandidate] = useState(false)
+
   function handleSetSelectedLab(lab) {
+    console.log('lab', lab)
     const isLabSelected = selectedLabs.some((_lab) => _lab.lab_no == lab.lab_no)
     setSelectedLabs((prev) =>
       isLabSelected ? prev.filter((_lab) => _lab.lab_no !== lab.lab_no) : [...prev, lab]
     )
+
+    console.log(selectedLabs, '=selectedLabs')
   }
 
   useEffect(() => {
@@ -52,11 +64,11 @@ const Navbar = (props, inputRef) => {
           setBatches(_batchList)
           setLabs(_labList)
         } else {
-          showErrorToast(message || 'Something went wrong')
+          showErrorToast(message || 'Something went wrong', 'Failed to home page data')
         }
       } catch (err) {
         console.log(err)
-        showErrorToast('Failed to fetch the batches')
+        showErrorToast('Failed to fetch the batches','Failed to home page data')
       }
     }
 
@@ -67,19 +79,20 @@ const Navbar = (props, inputRef) => {
   const handleFetchCandidateData = async (e) => {
     e.preventDefault()
     e.stopPropagation()
+    setIsSearchingCandidate(true)
     try {
       if (!inputRef.current.value || isNaN(inputRef.current.value)) {
-        showWarningToast('Please enter a valid candidate id')
+        showWarningToast('Please enter a valid candidate id', 'invalid-candidate-id')
         return
       }
 
       if (!selectedBatch) {
-        showWarningToast('Please select a batch')
+        showWarningToast('Please select a batch', 'invalid-batch')
         return
       }
 
       if (selectedLabs.length === 0) {
-        showWarningToast('Please select atleast one lab')
+        showWarningToast('Please select atleast one lab', 'invalid-lab')
         return
       }
 
@@ -129,8 +142,17 @@ const Navbar = (props, inputRef) => {
       }
     } catch (err) {
       const er = err?.response?.data
-      showErrorToast(er?.message || 'Something went wrong')
+      showErrorToast(er?.message || 'Something went wrong', 'candidate-data-fetch-error')
+    } finally {
+      setIsSearchingCandidate(false)
     }
+  }
+
+  function handleResetSearch() {
+    setSelectedBatch([])
+    setSelectedLabs([])
+    inputRef.current.value = ''
+    dispatch(resetCandidateInfo())
   }
 
   return (
@@ -151,7 +173,7 @@ const Navbar = (props, inputRef) => {
       </Modal>
 
       <div className="bg-white sticky top-0 border-b border-gray-400">
-        <div className="container mx-auto px-4 py-2">
+        <div className=" mx-3 py-2">
           <div className="flex items-center justify-between font-semibold">
             <ul className="flex items-center gap-4 ">
               <li key="logo-image" onClick={() => dispatch(toggleSidebar(true))}>
@@ -168,7 +190,7 @@ const Navbar = (props, inputRef) => {
                   {/* Select batch options */}
                   <div>
                     <select
-                      className="px-4 py-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block text-md border border-gray-300 rounded-xl"
+                      className="px-4 py-2 w-full h-full outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block text-md border border-gray-300 rounded-xl"
                       name="batch_id"
                       id="batch-id"
                       onChange={(e) => setSelectedBatch(e.target.value)}
@@ -200,7 +222,7 @@ const Navbar = (props, inputRef) => {
                     selectedLabs={selectedLabs}
                   />
 
-                  <div className="input-holder">
+                  <div className="input-holder w-full">
                     <input
                       ref={inputRef}
                       type="number"
@@ -208,7 +230,7 @@ const Navbar = (props, inputRef) => {
                       id="student-id"
                       placeholder="Search candidate..."
                       autoComplete="off"
-                      className="p-2 outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block w-full max-w-48  text-md border border-gray-300 rounded-xl"
+                      className="p-2 w-full h-full outline-none shadow-sm ring-indigo-200 focus:ring-indigo-500 focus:border-indigo-500 block text-md border border-gray-300 rounded-xl"
                       // onChange={(e) => setCandidateId(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
@@ -217,19 +239,35 @@ const Navbar = (props, inputRef) => {
                       }}
                     />
                   </div>
-                  <div className="button-holder">
+                  <div className="button-holder grid grid-cols-2 gap-4 w-full">
                     <button
                       type="button"
                       id="search-btn"
-                      className="relative overflow-hidden inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className={`relative ${isSearchingCandiate ? 'disabled:opacity-50' : ''} gap-2 overflow-hidden h-full w-[100%] justify-center inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                      disabled={isSearchingCandiate}
                       onClick={handleFetchCandidateData}
                     >
-                      <span>Search</span>
-                      <div id="btn-loader-container">
-                        <div className="btn-loader-inside">
-                          <div id="btn-loader"></div>
-                        </div>
-                      </div>
+                      <span
+                        className={`flex gap-2 justify-center items-center transition-opacity duration-150 ${!isSearchingCandiate ? 'opacity-100' : 'opacity-0'}`}
+                      >
+                        <IoSearchOutline />
+                        <span>Search</span>
+                      </span>
+
+                      <AiOutlineLoading3Quarters
+                        className={`animate-spin absolute left-[40%] transition-opacity duration-150 ${isSearchingCandiate ? 'opacity-100' : 'opacity-0'}`}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      id="search-btn"
+                      className={`relative gap-2 overflow-hidden h-full w-full justify-center inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-red-500 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
+                      onClick={() => {
+                        handleResetSearch()
+                      }}
+                    >
+                      <RiResetLeftLine />
+                      <span>Reset</span>
                     </button>
                   </div>
                 </div>
