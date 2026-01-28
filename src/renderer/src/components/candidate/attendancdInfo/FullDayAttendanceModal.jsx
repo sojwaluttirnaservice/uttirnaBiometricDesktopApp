@@ -7,12 +7,9 @@ import { ModalBody, ModalDialog, ModalFooter, ModalHeader } from '../../modals/B
 export const FullDayAttendanceModal = ({
   children,
   isOpen,
-  setIsOpen,
   title = 'Modal Title',
-  onClose = () => {
-    setIsOpen(false)
-  },
-  isScrollable = false
+  isScrollable = false,
+  onClose
 }) => {
   const connectionData = useSelector((state) => state.connectionData)
   const [labwiseAttendanceCount, setLabwiseAttendanceCount] = useState(null)

@@ -1,37 +1,24 @@
-import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { AttendanceCard } from './AttendanceCard'
-import { FullDayAttendanceModal } from './FullDayAttendanceModal'
 
 const AttendanceInfo = () => {
   const candidateInfo = useSelector((state) => state.candidateInfo)
   const batchAttendance = useSelector((state) => state.batchAttendance)
 
-  const [isShowFullDayAttendanceModalOpen, setIsShowFullDayAttendanceModalOpen] = useState(false)
-
   return (
     <>
-      {/* Modal for full day attendance */}
-
-      <FullDayAttendanceModal
-        isOpen={isShowFullDayAttendanceModalOpen}
-        setIsOpen={setIsShowFullDayAttendanceModalOpen}
-        isScrollable={true}
-        title={'Full Day Attendance'}
-      />
-
       <div className="flex flex-col gap-4">
         <h3 className="flex items-center justify-center font-bold text-[#555]">
           Attendance Details
-          <span className="inline-block ms-auto">
+          {/* <span className="inline-block ms-auto">
             <button
-              className="px-4 py-1 border border-emerald-600 rounded-lg text-emerald-600"
+              className="px-4 py-1 border border-emerald-600 bg-red-400 rounded-lg text-white hover:bg-red-500 hover:shadow-md"
               type="button"
-              onClick={(e) => setIsShowFullDayAttendanceModalOpen(true)}
+              onClick={(e) => dispatch(openModal('fullDayAttendance'))}
             >
               Full Day Attendance
             </button>
-          </span>
+          </span> */}
         </h3>
 
         <div className="attendance-details grow">

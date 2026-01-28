@@ -1,14 +1,15 @@
-import React from 'react'
+import { useDispatch } from "react-redux"
+import { toggleModal } from "../../../redux/slices/modalSlice"
 
 const DangerModal = ({
   isOpen,
-  setIsOpen,
   confirmButtonName,
-  onClose = () => setIsOpen(false), // Default onClose to setIsOpen(false)
+  onClose,
   onConfirm,
   title = 'Are you sure?',
   message = 'This action cannot be undone.'
 }) => {
+  const dispatch = useDispatch()
   if (!isOpen) return null // Don't render modal if it's not open
 
   return (
@@ -35,7 +36,7 @@ const DangerModal = ({
             {confirmButtonName || 'Yes, Confirm'}
           </button>
           <button
-            onClick={onClose} // Close modal when clicking Cancel
+            onClick={() => dispatch(toggleModal('logoutModal'))} // Close modal when clicking Cancel
             className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none"
           >
             Cancel
