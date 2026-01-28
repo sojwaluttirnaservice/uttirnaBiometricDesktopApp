@@ -48,7 +48,7 @@ export const FullDayAttendanceModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
-      <ModalDialog width="w-[60rem]" height="h-[32rem]">
+      <ModalDialog width="w-[90vw]" height="h-[90vh]">
         <ModalHeader title={title} onClose={onClose} />
 
         {!labwiseAttendanceCount ? (
